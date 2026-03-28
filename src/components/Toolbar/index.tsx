@@ -2,14 +2,17 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { loadFontFile, injectUploadedFont } from '../../utils/fonts';
 import { exportAllSettings, parseSettingsFile } from '../../utils/exportSettings';
+import type { TextInput } from '../../types';
 import './Toolbar.css';
 
 export function Toolbar() {
   const {
     settings,
     updateSettings,
-    textContent,
-    setTextContent,
+    textInputs,
+    addTextInput,
+    removeTextInput,
+    updateTextInput,
     fonts,
     toggleFontActive,
     removeFont,
@@ -71,13 +74,13 @@ export function Toolbar() {
   const handleExportSettings = useCallback(async () => {
     setExporting(true);
     try {
-      await exportAllSettings({ settings, textContent, fonts, images, favorites, toolbarOpen });
+      await exportAllSettings({ settings, textInputs, fonts, images, favorites, toolbarOpen });
     } catch (err) {
       console.error('Export error:', err);
     } finally {
       setExporting(false);
     }
-  }, [settings, textContent, fonts, images, favorites, toolbarOpen]);
+  }, [settings, textInputs, fonts, images, favorites, toolbarOpen]);
 
   const handleImportSettings = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -137,32 +140,8 @@ export function Toolbar() {
       <div className="toolbar__body">
         {activeTab === 'settings' && (
           <div className="toolbar__panel">
-            {/* Text input */}
-            <div className="toolbar__section">
-              <label className="toolbar__label">Text (one line per row)</label>
-              <textarea
-                className="toolbar__textarea"
-                value={textContent}
-                onChange={(e) => setTextContent(e.target.value)}
-                rows={3}
-                spellCheck={false}
-              />
-            </div>
-
+            {/* Global settings */}
             <div className="toolbar__controls-grid">
-              {/* Font size */}
-              <div className="toolbar__control">
-                <label className="toolbar__label">Size <span className="toolbar__value">{settings.fontSize}px</span></label>
-                <input
-                  type="range"
-                  min={16}
-                  max={180}
-                  value={settings.fontSize}
-                  onChange={(e) => updateSettings({ fontSize: Number(e.target.value) })}
-                />
-              </div>
-
-              {/* Columns */}
               <div className="toolbar__control">
                 <label className="toolbar__label">Columns <span className="toolbar__value">{settings.columns}</span></label>
                 <input
@@ -174,21 +153,6 @@ export function Toolbar() {
                   onChange={(e) => updateSettings({ columns: Number(e.target.value) })}
                 />
               </div>
-
-              {/* Letter spacing */}
-              <div className="toolbar__control">
-                <label className="toolbar__label">Letter Spacing <span className="toolbar__value">{settings.letterSpacing.toFixed(2)}em</span></label>
-                <input
-                  type="range"
-                  min={-0.1}
-                  max={0.5}
-                  step={0.01}
-                  value={settings.letterSpacing}
-                  onChange={(e) => updateSettings({ letterSpacing: Number(e.target.value) })}
-                />
-              </div>
-
-              {/* Padding */}
               <div className="toolbar__control">
                 <label className="toolbar__label">Padding <span className="toolbar__value">{settings.padding}px</span></label>
                 <input
@@ -199,82 +163,27 @@ export function Toolbar() {
                   onChange={(e) => updateSettings({ padding: Number(e.target.value) })}
                 />
               </div>
-
-              {/* Line height */}
-              <div className="toolbar__control">
-                <label className="toolbar__label">Line Height <span className="toolbar__value">{settings.lineHeight.toFixed(1)}</span></label>
-                <input
-                  type="range"
-                  min={0.7}
-                  max={2.0}
-                  step={0.05}
-                  value={settings.lineHeight}
-                  onChange={(e) => updateSettings({ lineHeight: Number(e.target.value) })}
-                />
-              </div>
-
-              {/* Overlay opacity */}
-              <div className="toolbar__control">
-                <label className="toolbar__label">Overlay <span className="toolbar__value">{Math.round(settings.overlayOpacity * 100)}%</span></label>
-                <input
-                  type="range"
-                  min={0}
-                  max={0.9}
-                  step={0.05}
-                  value={settings.overlayOpacity}
-                  onChange={(e) => updateSettings({ overlayOpacity: Number(e.target.value) })}
-                />
-              </div>
             </div>
 
-            {/* Toggle row */}
-            <div className="toolbar__toggles">
-              <label className="toolbar__toggle-item">
-                <span>No wrap</span>
-                <button
-                  className={`toolbar__switch ${settings.textWrap ? 'toolbar__switch--on' : ''}`}
-                  onClick={() => updateSettings({ textWrap: !settings.textWrap })}
-                />
-              </label>
-              <label className="toolbar__toggle-item">
-                <span>Shadow</span>
-                <button
-                  className={`toolbar__switch ${settings.textShadow ? 'toolbar__switch--on' : ''}`}
-                  onClick={() => updateSettings({ textShadow: !settings.textShadow })}
-                />
-              </label>
-              <label className="toolbar__toggle-item">
-                <span>Grayscale</span>
-                <button
-                  className={`toolbar__switch ${settings.grayscale ? 'toolbar__switch--on' : ''}`}
-                  onClick={() => updateSettings({ grayscale: !settings.grayscale })}
-                />
-              </label>
+            {/* Text inputs */}
+            <div className="toolbar__inputs-header">
+              <span className="toolbar__label" style={{ marginBottom: 0 }}>Text Layers</span>
+              <button className="toolbar__add-input-btn" onClick={addTextInput}>
+                <PlusIcon />
+                Add layer
+              </button>
             </div>
 
-            {/* Alignment */}
-            <div className="toolbar__alignment">
-              {(['left', 'center', 'right'] as const).map((align) => (
-                <button
-                  key={align}
-                  className={`toolbar__align-btn ${settings.alignment === align ? 'toolbar__align-btn--active' : ''}`}
-                  onClick={() => updateSettings({ alignment: align })}
-                  title={align}
-                >
-                  {align === 'left' ? <AlignLeftIcon /> : align === 'center' ? <AlignCenterIcon /> : <AlignRightIcon />}
-                </button>
-              ))}
-              {/* Text color */}
-              <div className="toolbar__color-wrap">
-                <span className="toolbar__label" style={{ marginBottom: 0 }}>Color</span>
-                <input
-                  type="color"
-                  className="toolbar__color"
-                  value={settings.textColor}
-                  onChange={(e) => updateSettings({ textColor: e.target.value })}
-                />
-              </div>
-            </div>
+            {textInputs.map((input, idx) => (
+              <TextInputPanel
+                key={input.id}
+                input={input}
+                index={idx}
+                canRemove={textInputs.length > 1}
+                onUpdate={(partial) => updateTextInput(input.id, partial)}
+                onRemove={() => removeTextInput(input.id)}
+              />
+            ))}
 
             {/* Export / Import */}
             <div className="toolbar__section toolbar__section--transfer">
@@ -360,6 +269,30 @@ export function Toolbar() {
 
         {activeTab === 'images' && (
           <div className="toolbar__panel">
+            {/* Image-specific settings */}
+            <div className="toolbar__controls-grid">
+              <div className="toolbar__control">
+                <label className="toolbar__label">Overlay <span className="toolbar__value">{Math.round(settings.overlayOpacity * 100)}%</span></label>
+                <input
+                  type="range"
+                  min={0}
+                  max={0.9}
+                  step={0.05}
+                  value={settings.overlayOpacity}
+                  onChange={(e) => updateSettings({ overlayOpacity: Number(e.target.value) })}
+                />
+              </div>
+            </div>
+            <div className="toolbar__toggles">
+              <label className="toolbar__toggle-item">
+                <span>Grayscale</span>
+                <button
+                  className={`toolbar__switch ${settings.grayscale ? 'toolbar__switch--on' : ''}`}
+                  onClick={() => updateSettings({ grayscale: !settings.grayscale })}
+                />
+              </label>
+            </div>
+
             <div className="toolbar__images-grid">
               {images.map((img, idx) => (
                 <div key={idx} className="toolbar__image-thumb">
@@ -407,11 +340,162 @@ export function Toolbar() {
   );
 }
 
+// Per-input settings panel
+interface TextInputPanelProps {
+  input: TextInput;
+  index: number;
+  canRemove: boolean;
+  onUpdate: (partial: Partial<Omit<TextInput, 'id'>>) => void;
+  onRemove: () => void;
+}
+
+function TextInputPanel({ input, index, canRemove, onUpdate, onRemove }: TextInputPanelProps) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  return (
+    <div className="toolbar__input-panel">
+      <div className="toolbar__input-header">
+        <button
+          className="toolbar__input-collapse"
+          onClick={() => setCollapsed((v) => !v)}
+          title={collapsed ? 'Expand' : 'Collapse'}
+        >
+          <ChevronSmallIcon open={!collapsed} />
+          <span className="toolbar__input-title">Layer {index + 1} <span className="toolbar__input-text">{input.text}</span></span>
+        </button>
+        {canRemove && (
+          <button className="toolbar__input-remove" onClick={onRemove} title="Remove layer">
+            ×
+          </button>
+        )}
+      </div>
+
+      {!collapsed && (
+        <div className="toolbar__input-body">
+          {/* Text area */}
+          <textarea
+            className="toolbar__textarea"
+            value={input.text}
+            onChange={(e) => onUpdate({ text: e.target.value })}
+            rows={2}
+            spellCheck={false}
+            placeholder="Text content…"
+          />
+
+          {/* Sliders */}
+          <div className="toolbar__controls-grid">
+            <div className="toolbar__control">
+              <label className="toolbar__label">Size <span className="toolbar__value">{input.fontSize}px</span></label>
+              <input
+                type="range"
+                min={16}
+                max={180}
+                value={input.fontSize}
+                onChange={(e) => onUpdate({ fontSize: Number(e.target.value) })}
+              />
+            </div>
+            <div className="toolbar__control">
+              <label className="toolbar__label">Letter Spacing <span className="toolbar__value">{input.letterSpacing.toFixed(2)}em</span></label>
+              <input
+                type="range"
+                min={-0.1}
+                max={0.5}
+                step={0.01}
+                value={input.letterSpacing}
+                onChange={(e) => onUpdate({ letterSpacing: Number(e.target.value) })}
+              />
+            </div>
+            <div className="toolbar__control">
+              <label className="toolbar__label">Line Height <span className="toolbar__value">{input.lineHeight.toFixed(1)}</span></label>
+              <input
+                type="range"
+                min={0.7}
+                max={2.0}
+                step={0.05}
+                value={input.lineHeight}
+                onChange={(e) => onUpdate({ lineHeight: Number(e.target.value) })}
+              />
+            </div>
+          </div>
+
+          {/* Toggles */}
+          <div className="toolbar__toggles">
+            <label className="toolbar__toggle-item">
+              <span>No wrap</span>
+              <button
+                className={`toolbar__switch ${input.textWrap ? 'toolbar__switch--on' : ''}`}
+                onClick={() => onUpdate({ textWrap: !input.textWrap })}
+              />
+            </label>
+            <label className="toolbar__toggle-item">
+              <span>Shadow</span>
+              <button
+                className={`toolbar__switch ${input.textShadow ? 'toolbar__switch--on' : ''}`}
+                onClick={() => onUpdate({ textShadow: !input.textShadow })}
+              />
+            </label>
+          </div>
+
+          {/* Alignment row */}
+          <div className="toolbar__alignment-row">
+            {/* Horizontal alignment */}
+            <div className="toolbar__align-group">
+              {(['left', 'center', 'right'] as const).map((align) => (
+                <button
+                  key={align}
+                  className={`toolbar__align-btn ${input.alignment === align ? 'toolbar__align-btn--active' : ''}`}
+                  onClick={() => onUpdate({ alignment: align })}
+                  title={`Align ${align}`}
+                >
+                  {align === 'left' ? <AlignLeftIcon /> : align === 'center' ? <AlignCenterIcon /> : <AlignRightIcon />}
+                </button>
+              ))}
+            </div>
+
+            {/* Vertical alignment */}
+            <div className="toolbar__align-group">
+              {(['top', 'center', 'bottom'] as const).map((v) => (
+                <button
+                  key={v}
+                  className={`toolbar__align-btn ${input.verticalAlignment === v ? 'toolbar__align-btn--active' : ''}`}
+                  onClick={() => onUpdate({ verticalAlignment: v })}
+                  title={`Vertical ${v}`}
+                >
+                  {v === 'top' ? <AlignTopIcon /> : v === 'center' ? <AlignVCenterIcon /> : <AlignBottomIcon />}
+                </button>
+              ))}
+            </div>
+
+            {/* Color picker */}
+            <div className="toolbar__color-wrap">
+              <span className="toolbar__label" style={{ marginBottom: 0 }}>Color</span>
+              <input
+                type="color"
+                className="toolbar__color"
+                value={input.textColor}
+                onChange={(e) => onUpdate({ textColor: e.target.value })}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Icons
 function ChevronIcon({ open }: { open: boolean }) {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
       <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ChevronSmallIcon({ open }: { open: boolean }) {
+  return (
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s', flexShrink: 0 }}>
+      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -445,9 +529,18 @@ function RefreshIcon() {
   );
 }
 
+function PlusIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
 function AlignLeftIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
       <line x1="3" y1="6" x2="21" y2="6" />
       <line x1="3" y1="12" x2="15" y2="12" />
       <line x1="3" y1="18" x2="18" y2="18" />
@@ -457,7 +550,7 @@ function AlignLeftIcon() {
 
 function AlignCenterIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
       <line x1="3" y1="6" x2="21" y2="6" />
       <line x1="6" y1="12" x2="18" y2="12" />
       <line x1="4" y1="18" x2="20" y2="18" />
@@ -467,10 +560,40 @@ function AlignCenterIcon() {
 
 function AlignRightIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
       <line x1="3" y1="6" x2="21" y2="6" />
       <line x1="9" y1="12" x2="21" y2="12" />
       <line x1="6" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
+function AlignTopIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="3" y1="3" x2="21" y2="3" />
+      <rect x="7" y="6" width="4" height="14" rx="1" />
+      <rect x="13" y="6" width="4" height="9" rx="1" />
+    </svg>
+  );
+}
+
+function AlignVCenterIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <rect x="7" y="4" width="4" height="16" rx="1" />
+      <rect x="13" y="7" width="4" height="10" rx="1" />
+    </svg>
+  );
+}
+
+function AlignBottomIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="3" y1="21" x2="21" y2="21" />
+      <rect x="7" y="4" width="4" height="14" rx="1" />
+      <rect x="13" y="9" width="4" height="9" rx="1" />
     </svg>
   );
 }

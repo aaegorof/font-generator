@@ -40,8 +40,7 @@ export function FavoritesViewer() {
 
   if (!favoritesViewOpen || !current) return null;
 
-  const { tile, settings, textContent } = current;
-  const textLines = textContent.split('\n').filter((l) => l.length > 0);
+  const { tile, settings, textInputs } = current;
 
   const getFontFamily = (fontId: string) => {
     const font = fonts.find((f) => f.id === fontId);
@@ -57,17 +56,6 @@ export function FavoritesViewer() {
     const font = fonts.find((f) => f.id === fontId);
     return font ? font.name : fontId;
   };
-
-  const textShadowStyle = settings.textShadow
-    ? '0 2px 30px rgba(0,0,0,0.9), 0 1px 6px rgba(0,0,0,0.6)'
-    : 'none';
-
-  const alignItems =
-    settings.alignment === 'left'
-      ? 'flex-start'
-      : settings.alignment === 'right'
-      ? 'flex-end'
-      : 'center';
 
   const handleExport = async () => {
     if (!slideRef.current) return;
@@ -106,41 +94,56 @@ export function FavoritesViewer() {
             className="fav-viewer__overlay"
             style={{ backgroundColor: `rgba(0,0,0,${settings.overlayOpacity})` }}
           />
-          <div
-            className="fav-viewer__text"
-            style={{
-              padding: Math.max(settings.padding * 1.5, 40),
-              alignItems,
-              textAlign: settings.alignment,
-            }}
-          >
-            {textLines.map((line, i) => {
-              const fontId = tile.fontIds[i % tile.fontIds.length];
-              return (
-                <div
-                  key={i}
-                  style={{
-                    fontFamily: getFontFamily(fontId),
-                    fontWeight: getFontWeight(fontId),
-                    fontSize: Math.round(settings.fontSize * 1.6),
-                    letterSpacing: `${settings.letterSpacing}em`,
-                    lineHeight: settings.lineHeight,
-                    color: settings.textColor,
-                    textShadow: textShadowStyle,
-                    whiteSpace: settings.textWrap ? 'nowrap' : 'normal',
-                  }}
-                >
-                  {line}
-                </div>
-              );
-            })}
-          </div>
+
+          {textInputs.map((input, i) => {
+            const fontId = tile.fontIds[i % tile.fontIds.length];
+            const lines = input.text.split('\n').filter((l) => l.length > 0);
+            const textShadowStyle = input.textShadow
+              ? '0 2px 30px rgba(0,0,0,0.9), 0 1px 6px rgba(0,0,0,0.6)'
+              : 'none';
+            const alignItems =
+              input.alignment === 'left'
+                ? 'flex-start'
+                : input.alignment === 'right'
+                ? 'flex-end'
+                : 'center';
+
+            return (
+              <div
+                key={input.id}
+                className={`fav-viewer__text fav-viewer__text--v-${input.verticalAlignment}`}
+                style={{
+                  padding: Math.max(settings.padding * 1.5, 40),
+                  alignItems,
+                  textAlign: input.alignment,
+                }}
+              >
+                {lines.map((line, lineIdx) => (
+                  <div
+                    key={lineIdx}
+                    style={{
+                      fontFamily: getFontFamily(fontId),
+                      fontWeight: getFontWeight(fontId),
+                      fontSize: Math.round(input.fontSize * 1.6),
+                      letterSpacing: `${input.letterSpacing}em`,
+                      lineHeight: input.lineHeight,
+                      color: input.textColor,
+                      textShadow: textShadowStyle,
+                      whiteSpace: input.textWrap ? 'nowrap' : 'normal',
+                    }}
+                  >
+                    {line}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </div>
 
         {/* Meta */}
         <div className="fav-viewer__meta">
           <div className="fav-viewer__fonts">
-            {tile.fontIds.slice(0, textLines.length).map((fId, i) => (
+            {tile.fontIds.slice(0, textInputs.length).map((fId, i) => (
               <span key={i} className="fav-viewer__font-tag">
                 <span className="fav-viewer__font-preview" style={{ fontFamily: getFontFamily(fId), fontWeight: getFontWeight(fId) }}>
                   Aa

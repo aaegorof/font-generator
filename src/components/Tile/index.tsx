@@ -10,13 +10,10 @@ interface TileProps {
 }
 
 export const Tile = memo(function Tile({ tile, favoriteIndex }: TileProps) {
-  const { settings, textContent, fonts, addFavorite, removeFavorite, favorites, randomizeSingleTile } =
+  const { settings, textInputs, fonts, addFavorite, removeFavorite, favorites, randomizeSingleTile } =
     useStore();
 
   const tileRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  const textLines = textContent.split('\n').filter((l) => l.length > 0);
 
   const isFav = favorites.some((f) => {
     const fontMatch = f.tile.fontIds.join(',') === tile.fontIds.join(',');
@@ -74,21 +71,9 @@ export const Tile = memo(function Tile({ tile, favoriteIndex }: TileProps) {
     return font ? font.name : fontId;
   };
 
-  const textShadowStyle = settings.textShadow
-    ? '0 2px 20px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.6)'
-    : 'none';
-
-  const alignItems =
-    settings.alignment === 'left'
-      ? 'flex-start'
-      : settings.alignment === 'right'
-      ? 'flex-end'
-      : 'center';
-
   return (
     <div className="tile" ref={tileRef} data-tile-id={tile.id}>
       <img
-        ref={imgRef}
         className="tile__image"
         src={tile.imageUrl}
         alt=""
@@ -102,36 +87,50 @@ export const Tile = memo(function Tile({ tile, favoriteIndex }: TileProps) {
         style={{ backgroundColor: `rgba(0,0,0,${settings.overlayOpacity})` }}
       />
 
-      <div
-        className="tile__text"
-        style={{
-          padding: settings.padding,
-          alignItems,
-          textAlign: settings.alignment,
-        }}
-      >
-        {textLines.map((line, i) => {
-          const fontId = tile.fontIds[i % tile.fontIds.length];
-          return (
-            <div
-              key={i}
-              className="tile__line"
-              style={{
-                fontFamily: getFontFamily(fontId),
-                fontWeight: getFontWeight(fontId),
-                fontSize: settings.fontSize,
-                letterSpacing: `${settings.letterSpacing}em`,
-                lineHeight: settings.lineHeight,
-                color: settings.textColor,
-                textShadow: textShadowStyle,
-                whiteSpace: settings.textWrap ? 'nowrap' : 'normal',
-              }}
-            >
-              {line}
-            </div>
-          );
-        })}
-      </div>
+      {textInputs.map((input, i) => {
+        const fontId = tile.fontIds[i % tile.fontIds.length];
+        const lines = input.text.split('\n').filter((l) => l.length > 0);
+        const textShadowStyle = input.textShadow
+          ? '0 2px 20px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.6)'
+          : 'none';
+        const alignItems =
+          input.alignment === 'left'
+            ? 'flex-start'
+            : input.alignment === 'right'
+            ? 'flex-end'
+            : 'center';
+
+        return (
+          <div
+            key={input.id}
+            className={`tile__text tile__text--v-${input.verticalAlignment}`}
+            style={{
+              padding: settings.padding,
+              alignItems,
+              textAlign: input.alignment,
+            }}
+          >
+            {lines.map((line, lineIdx) => (
+              <div
+                key={lineIdx}
+                className="tile__line"
+                style={{
+                  fontFamily: getFontFamily(fontId),
+                  fontWeight: getFontWeight(fontId),
+                  fontSize: input.fontSize,
+                  letterSpacing: `${input.letterSpacing}em`,
+                  lineHeight: input.lineHeight,
+                  color: input.textColor,
+                  textShadow: textShadowStyle,
+                  whiteSpace: input.textWrap ? 'nowrap' : 'normal',
+                }}
+              >
+                {line}
+              </div>
+            ))}
+          </div>
+        );
+      })}
 
       <div className="tile__actions">
         <button
@@ -158,7 +157,7 @@ export const Tile = memo(function Tile({ tile, favoriteIndex }: TileProps) {
       </div>
 
       <div className="tile__font-labels">
-        {tile.fontIds.slice(0, textLines.length).map((fId, i) => (
+        {tile.fontIds.slice(0, textInputs.length).map((fId, i) => (
           <span key={i} className="tile__font-label">
             {getFontName(fId)}
           </span>

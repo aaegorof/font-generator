@@ -278,19 +278,122 @@
   background: #fff;
 }
 
-/* Alignment */
-.toolbar__alignment {
+/* Text input panels */
+.toolbar__inputs-header {
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+}
+
+.toolbar__add-input-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  color: #666;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.toolbar__add-input-btn:hover {
+  color: #ccc;
+  border-color: #444;
+  background: #222;
+}
+
+.toolbar__input-panel {
+  border: 1px solid #1e1e1e;
+  border-radius: 6px;
+  background: #0d0d0d;
+  overflow: hidden;
+}
+
+.toolbar__input-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #161616;
+  border-bottom: 1px solid #1e1e1e;
+}
+
+.toolbar__input-collapse {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0;
+  text-align: left;
+  transition: color 0.15s;
+}
+
+.toolbar__input-collapse:hover {
+  color: #ccc;
+}
+
+.toolbar__input-title {
+  flex: 1;
+}
+
+.toolbar__input-remove {
+  background: none;
+  border: none;
+  color: #3a3a3a;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.toolbar__input-remove:hover {
+  color: #ff5555;
+  background: #1a1a1a;
+}
+
+.toolbar__input-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Alignment */
+.toolbar__alignment-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.toolbar__align-group {
+  display: flex;
+  gap: 2px;
 }
 
 .toolbar__align-btn {
   background: none;
   border: 1px solid #2a2a2a;
   color: #555;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -318,8 +421,8 @@
 }
 
 .toolbar__color {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border: 1px solid #333;
   border-radius: 4px;
   cursor: pointer;

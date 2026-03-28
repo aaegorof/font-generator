@@ -32,8 +32,19 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   pointer-events: none;
+}
+
+.tile__text--v-top {
+  justify-content: flex-start;
+}
+
+.tile__text--v-center {
+  justify-content: center;
+}
+
+.tile__text--v-bottom {
+  justify-content: flex-end;
 }
 
 .tile__line {

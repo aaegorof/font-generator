@@ -1,10 +1,10 @@
-import type { FontDef, Settings, FavoriteItem } from '../types';
+import type { FontDef, Settings, FavoriteItem, TextInput } from '../types';
 
 export interface SettingsExport {
   version: 1;
   exportedAt: number;
   settings: Settings;
-  textContent: string;
+  textInputs: TextInput[];
   fonts: FontDef[];
   images: string[];
   favorites: FavoriteItem[];
@@ -51,7 +51,7 @@ export async function exportAllSettings(data: Omit<SettingsExport, 'version' | '
     version: 1,
     exportedAt: Date.now(),
     settings: data.settings,
-    textContent: data.textContent,
+    textInputs: data.textInputs,
     fonts,
     images,
     favorites,

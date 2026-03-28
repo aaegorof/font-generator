@@ -10,6 +10,19 @@ export interface FontDef {
   isActive?: boolean;
 }
 
+export interface TextInput {
+  id: string;
+  text: string;
+  fontSize: number;
+  letterSpacing: number;
+  lineHeight: number;
+  textColor: string;
+  textShadow: boolean;
+  textWrap: boolean;
+  alignment: 'left' | 'center' | 'right';
+  verticalAlignment: 'top' | 'center' | 'bottom';
+}
+
 export interface TileData {
   id: string;
   imageUrl: string;
@@ -17,16 +30,9 @@ export interface TileData {
 }
 
 export interface Settings {
-  fontSize: number;
   columns: number;
-  letterSpacing: number;
   padding: number;
-  textWrap: boolean;
-  alignment: 'left' | 'center' | 'right';
   overlayOpacity: number;
-  lineHeight: number;
-  textColor: string;
-  textShadow: boolean;
   grayscale: boolean;
 }
 
@@ -34,6 +40,6 @@ export interface FavoriteItem {
   id: string;
   tile: TileData;
   settings: Settings;
-  textContent: string;
+  textInputs: TextInput[];
   savedAt: number;
 }

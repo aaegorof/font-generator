@@ -76,8 +76,19 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   pointer-events: none;
+}
+
+.fav-viewer__text--v-top {
+  justify-content: flex-start;
+}
+
+.fav-viewer__text--v-center {
+  justify-content: center;
+}
+
+.fav-viewer__text--v-bottom {
+  justify-content: flex-end;
 }
 
 /* Meta */
