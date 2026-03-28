@@ -1,0 +1,139 @@
+.tile {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: #1a1a1a;
+  cursor: pointer;
+  display: block;
+}
+
+.tile__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.tile:hover .tile__image {
+  transform: scale(1.03);
+}
+
+.tile__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tile__text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.tile__line {
+  display: block;
+  word-break: break-word;
+}
+
+/* Actions */
+.tile__actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tile:hover .tile__actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tile__action {
+  width: 30px;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.tile__action:hover {
+  background: rgba(0, 0, 0, 0.85);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.tile__action--heart-active {
+  color: #ff4d6d;
+}
+
+.tile__action--heart-active svg {
+  fill: #ff4d6d;
+  stroke: #ff4d6d;
+}
+
+/* Font labels */
+.tile__font-labels {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  flex-wrap: wrap;
+}
+
+.tile:hover .tile__font-labels {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tile__font-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* Favorite badge */
+.tile__fav-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 22px;
+  height: 22px;
+  background: rgba(255, 77, 109, 0.9);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,0 +1,227 @@
+.fav-viewer {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  animation: fav-fade-in 0.2s ease;
+}
+
+@keyframes fav-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fav-viewer__content {
+  position: relative;
+  width: 100%;
+  max-width: min(1200px, 92vw);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 60px;
+  box-sizing: border-box;
+}
+
+.fav-viewer__close {
+  position: absolute;
+  top: -40px;
+  right: 60px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+
+.fav-viewer__close:hover {
+  color: #fff;
+}
+
+/* Slide */
+.fav-viewer__slide {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1a1a1a;
+  flex-shrink: 0;
+}
+
+.fav-viewer__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fav-viewer__overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.fav-viewer__text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Meta */
+.fav-viewer__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.fav-viewer__fonts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fav-viewer__font-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  color: #aaa;
+  letter-spacing: 0.04em;
+}
+
+.fav-viewer__font-preview {
+  font-size: 16px;
+  color: #fff;
+  line-height: 1;
+}
+
+.fav-viewer__controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fav-viewer__btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #aaa;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.fav-viewer__btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.fav-viewer__btn--danger {
+  padding: 6px 8px;
+}
+
+.fav-viewer__btn--danger:hover {
+  background: rgba(255, 50, 50, 0.2);
+  border-color: rgba(255, 50, 50, 0.4);
+  color: #ff6b6b;
+}
+
+/* Navigation arrows */
+.fav-viewer__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: -30px; /* roughly center on the slide */
+}
+
+.fav-viewer__nav:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.fav-viewer__nav--prev {
+  left: 8px;
+}
+
+.fav-viewer__nav--next {
+  right: 8px;
+}
+
+/* Counter */
+.fav-viewer__counter {
+  position: absolute;
+  top: -40px;
+  left: 60px;
+  font-size: 11px;
+  color: #555;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dots */
+.fav-viewer__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+
+.fav-viewer__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #333;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.fav-viewer__dot--active {
+  background: #fff;
+  transform: scale(1.3);
+}
+
+.fav-viewer__dot:hover {
+  background: #888;
+}

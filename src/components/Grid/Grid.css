@@ -1,0 +1,15 @@
+.grid {
+  display: grid;
+  gap: 0;
+  width: 100%;
+}
+
+.grid-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: #444;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
