@@ -12,4 +12,4 @@ export const DEFAULT_IMAGES: string[] = [
   'https://picsum.photos/seed/coast/800/600',
   'https://picsum.photos/seed/field/800/600',
   'https://picsum.photos/seed/sky/800/600',
-];
+]

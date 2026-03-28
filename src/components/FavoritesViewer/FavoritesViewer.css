@@ -1,156 +1,109 @@
+@reference '../../index.css';
+
 .fav-viewer {
-  position: fixed;
-  inset: 0;
+  @apply fixed inset-0 z-[1000] flex items-center justify-center;
   background: rgba(0, 0, 0, 0.92);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   backdrop-filter: blur(8px);
   animation: fav-fade-in 0.2s ease;
 }
 
 @keyframes fav-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .fav-viewer__content {
-  position: relative;
-  width: 100%;
+  @apply relative box-border flex w-full flex-col gap-4;
   max-width: min(1200px, 92vw);
   max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
   padding: 0 60px;
-  box-sizing: border-box;
 }
 
 .fav-viewer__close {
-  position: absolute;
+  @apply absolute flex cursor-pointer items-center justify-center rounded-full border-none p-1.5;
   top: -40px;
   right: 60px;
   background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: var(--color-text-secondary);
   transition: color 0.15s;
 }
 
 .fav-viewer__close:hover {
-  color: #fff;
+  @apply text-white;
 }
 
 /* Slide */
 .fav-viewer__slide {
-  position: relative;
+  @apply relative flex-shrink-0 overflow-hidden rounded-lg;
   aspect-ratio: 4 / 3;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #1a1a1a;
-  flex-shrink: 0;
+  background: var(--color-bg-subtle);
 }
 
 .fav-viewer__image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  @apply absolute inset-0 block h-full w-full object-cover;
 }
 
 .fav-viewer__overlay {
-  position: absolute;
-  inset: 0;
+  @apply absolute inset-0;
 }
 
 .fav-viewer__text {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  pointer-events: none;
+  @apply pointer-events-none absolute inset-0 flex flex-col;
 }
 
 .fav-viewer__text--v-top {
-  justify-content: flex-start;
+  @apply justify-start;
 }
 
 .fav-viewer__text--v-center {
-  justify-content: center;
+  @apply justify-center;
 }
 
 .fav-viewer__text--v-bottom {
-  justify-content: flex-end;
+  @apply justify-end;
 }
 
 /* Meta */
 .fav-viewer__meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  @apply flex flex-wrap items-center justify-between gap-3;
 }
 
 .fav-viewer__fonts {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  @apply flex flex-wrap gap-2;
 }
 
 .fav-viewer__font-tag {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  @apply flex items-center gap-1.5 rounded-[20px] text-[11px] tracking-[0.04em];
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text-soft);
   padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  color: #aaa;
-  letter-spacing: 0.04em;
 }
 
 .fav-viewer__font-preview {
-  font-size: 16px;
-  color: #fff;
-  line-height: 1;
+  @apply text-[16px] leading-none text-white;
 }
 
 .fav-viewer__controls {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+  @apply flex items-center gap-2;
 }
 
 .fav-viewer__btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  @apply flex cursor-pointer items-center gap-1.5 rounded-md border text-[11px] font-semibold tracking-[0.06em] uppercase;
   background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #aaa;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-soft);
   padding: 6px 12px;
-  cursor: pointer;
-  border-radius: 6px;
   transition: all 0.15s;
 }
 
 .fav-viewer__btn:hover {
   background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  @apply text-white;
   border-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -166,22 +119,16 @@
 
 /* Navigation arrows */
 .fav-viewer__nav {
-  position: absolute;
+  @apply absolute flex cursor-pointer items-center justify-center rounded-full border text-white;
   top: 50%;
   transform: translateY(-50%);
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
+  border-color: rgba(255, 255, 255, 0.1);
   width: 44px;
   height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  margin-top: -30px;
   transition: all 0.15s;
-  margin-top: -30px; /* roughly center on the slide */
 }
 
 .fav-viewer__nav:hover {
@@ -199,40 +146,31 @@
 
 /* Counter */
 .fav-viewer__counter {
-  position: absolute;
+  @apply absolute text-[11px] font-medium tracking-[0.06em];
   top: -40px;
   left: 60px;
-  font-size: 11px;
-  color: #555;
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }
 
 /* Dots */
 .fav-viewer__dots {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  padding-bottom: 8px;
+  @apply flex justify-center gap-1.5 pb-2;
 }
 
 .fav-viewer__dot {
+  @apply cursor-pointer rounded-full border-none p-0;
   width: 6px;
   height: 6px;
-  border-radius: 50%;
-  background: #333;
-  border: none;
-  cursor: pointer;
+  background: var(--color-border-muted);
   transition: all 0.15s;
-  padding: 0;
 }
 
 .fav-viewer__dot--active {
-  background: #fff;
+  @apply bg-white;
   transform: scale(1.3);
 }
 
 .fav-viewer__dot:hover {
-  background: #888;
+  color: var(--color-text-placeholder);
 }

@@ -1,19 +1,13 @@
+@reference '../../index.css';
+
 .tile {
-  position: relative;
-  overflow: hidden;
+  @apply relative block cursor-pointer overflow-hidden;
   aspect-ratio: 4 / 3;
-  background: #1a1a1a;
-  cursor: pointer;
-  display: block;
+  background: var(--color-bg-subtle);
 }
 
 .tile__image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  @apply absolute inset-0 block h-full w-full object-cover;
   transition: transform 0.4s ease;
 }
 
@@ -22,66 +16,53 @@
 }
 
 .tile__overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  @apply pointer-events-none absolute inset-0;
 }
 
 .tile__text {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  pointer-events: none;
+  @apply pointer-events-none absolute inset-0 flex flex-col;
 }
 
 .tile__text--v-top {
-  justify-content: flex-start;
+  @apply justify-start;
 }
 
 .tile__text--v-center {
-  justify-content: center;
+  @apply justify-center;
 }
 
 .tile__text--v-bottom {
-  justify-content: flex-end;
+  @apply justify-end;
 }
 
 .tile__line {
-  display: block;
-  word-break: break-word;
+  @apply block break-words;
 }
 
 /* Actions */
 .tile__actions {
-  position: absolute;
+  @apply absolute flex flex-col gap-[6px] opacity-0;
   top: 10px;
   right: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  opacity: 0;
   transform: translateY(-4px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .tile:hover .tile__actions {
-  opacity: 1;
+  @apply opacity-100;
   transform: translateY(0);
 }
 
 .tile__action {
+  @apply flex cursor-pointer items-center justify-center text-white;
   width: 30px;
   height: 30px;
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transition: all 0.15s;
 }
 
@@ -92,59 +73,43 @@
 }
 
 .tile__action--heart-active {
-  color: #ff4d6d;
+  color: var(--color-accent-heart);
 }
 
 .tile__action--heart-active svg {
-  fill: #ff4d6d;
-  stroke: #ff4d6d;
+  fill: var(--color-accent-heart);
+  stroke: var(--color-accent-heart);
 }
 
 /* Font labels */
 .tile__font-labels {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  padding: 8px;
-  opacity: 0;
+  @apply absolute right-0 bottom-0 left-0 flex flex-wrap gap-1 p-2 opacity-0;
   transform: translateY(4px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  flex-wrap: wrap;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .tile:hover .tile__font-labels {
-  opacity: 1;
+  @apply opacity-100;
   transform: translateY(0);
 }
 
 .tile__font-label {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  @apply rounded-[3px] text-[9px] font-semibold tracking-[0.08em] uppercase;
   color: rgba(255, 255, 255, 0.7);
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(4px);
   padding: 2px 6px;
-  border-radius: 3px;
 }
 
 /* Favorite badge */
 .tile__fav-badge {
-  position: absolute;
+  @apply absolute flex items-center justify-center text-[10px] font-bold text-white;
   top: 10px;
   left: 10px;
   width: 22px;
   height: 22px;
   background: rgba(255, 77, 109, 0.9);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }

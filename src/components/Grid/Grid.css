@@ -1,15 +1,9 @@
+@reference '../../index.css';
+
 .grid {
-  display: grid;
-  gap: 0;
-  width: 100%;
+  @apply grid w-full gap-0;
 }
 
 .grid-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  color: #444;
-  font-size: 14px;
-  letter-spacing: 0.04em;
+  @apply text-text-dim flex min-h-[60vh] items-center justify-center text-[14px] tracking-[0.04em];
 }

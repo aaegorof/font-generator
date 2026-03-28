@@ -1,4 +1,4 @@
-import type { FontDef } from '../types';
+import type { FontDef } from '../types'
 
 export const DEFAULT_FONTS: FontDef[] = [
   {
@@ -88,32 +88,32 @@ export const DEFAULT_FONTS: FontDef[] = [
     source: 'google',
     isActive: true,
   },
-];
+]
 
 const GOOGLE_FONT_FAMILIES = [
   'Jost:wght@300;400;500;700',
   'Bebas+Neue',
   'Playfair+Display:wght@700;900',
   'Space+Grotesk:wght@400;700',
-];
+]
 
 export function setupGoogleFonts() {
-  const id = 'google-fonts-link';
-  if (document.getElementById(id)) return;
-  const link = document.createElement('link');
-  link.id = id;
-  link.rel = 'stylesheet';
-  link.href = `https://fonts.googleapis.com/css2?${GOOGLE_FONT_FAMILIES.map(f => `family=${f}`).join('&')}&display=swap`;
-  document.head.appendChild(link);
+  const id = 'google-fonts-link'
+  if (document.getElementById(id)) return
+  const link = document.createElement('link')
+  link.id = id
+  link.rel = 'stylesheet'
+  link.href = `https://fonts.googleapis.com/css2?${GOOGLE_FONT_FAMILIES.map((f) => `family=${f}`).join('&')}&display=swap`
+  document.head.appendChild(link)
 }
 
 export function injectLocalFontFaces(fonts: FontDef[]) {
-  const styleId = 'local-font-faces';
-  let style = document.getElementById(styleId) as HTMLStyleElement | null;
+  const styleId = 'local-font-faces'
+  let style = document.getElementById(styleId) as HTMLStyleElement | null
   if (!style) {
-    style = document.createElement('style');
-    style.id = styleId;
-    document.head.appendChild(style);
+    style = document.createElement('style')
+    style.id = styleId
+    document.head.appendChild(style)
   }
 
   const rules = fonts
@@ -127,38 +127,38 @@ export function injectLocalFontFaces(fonts: FontDef[]) {
        url('/fonts/${f.localFile}.ttf') format('truetype');
   font-weight: ${f.weight};
   font-display: swap;
-}`
+}`,
     )
-    .join('\n');
+    .join('\n')
 
-  style.textContent = rules;
+  style.textContent = rules
 }
 
 export function injectUploadedFont(font: FontDef) {
-  if (!font.uploadUrl) return;
-  const styleId = `upload-font-${font.id}`;
-  let style = document.getElementById(styleId) as HTMLStyleElement | null;
+  if (!font.uploadUrl) return
+  const styleId = `upload-font-${font.id}`
+  let style = document.getElementById(styleId) as HTMLStyleElement | null
   if (!style) {
-    style = document.createElement('style');
-    style.id = styleId;
-    document.head.appendChild(style);
+    style = document.createElement('style')
+    style.id = styleId
+    document.head.appendChild(style)
   }
   style.textContent = `@font-face {
   font-family: '${font.family}';
   src: url('${font.uploadUrl}');
   font-weight: ${font.weight};
   font-display: swap;
-}`;
+}`
 }
 
 export async function loadFontFile(file: File): Promise<FontDef> {
-  const url = URL.createObjectURL(file);
-  const baseName = file.name.replace(/\.(woff2?|ttf|otf)$/i, '');
-  const family = baseName.replace(/[-_]/g, ' ');
+  const url = URL.createObjectURL(file)
+  const baseName = file.name.replace(/\.(woff2?|ttf|otf)$/i, '')
+  const family = baseName.replace(/[-_]/g, ' ')
 
-  const fontFace = new FontFace(family, `url(${url})`);
-  await fontFace.load();
-  document.fonts.add(fontFace);
+  const fontFace = new FontFace(family, `url(${url})`)
+  await fontFace.load()
+  document.fonts.add(fontFace)
 
   return {
     id: `upload-${Date.now()}`,
@@ -168,5 +168,5 @@ export async function loadFontFile(file: File): Promise<FontDef> {
     source: 'upload',
     uploadUrl: url,
     isActive: true,
-  };
+  }
 }
