@@ -20,7 +20,7 @@
 }
 
 .tile__text {
-  @apply pointer-events-none absolute inset-0 flex flex-col;
+  @apply absolute inset-0 flex flex-col;
 }
 
 .tile__text--v-top {

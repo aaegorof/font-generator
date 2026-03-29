@@ -25,7 +25,7 @@ export const DEFAULT_TEXT_INPUT_STYLE: Omit<TextInput, 'id' | 'text'> = {
 }
 
 const DEFAULT_TEXT_INPUTS: TextInput[] = [
-  { id: 'input-default-1', text: 'de\nTribe', ...DEFAULT_TEXT_INPUT_STYLE },
+  { id: 'input-default-1', text: 'de Tribe', ...DEFAULT_TEXT_INPUT_STYLE },
 ]
 
 interface AppState {

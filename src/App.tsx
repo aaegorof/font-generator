@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { Toolbar } from './components/Toolbar'
 import { Grid } from './components/Grid'
 import { FavoritesViewer } from './components/FavoritesViewer'
@@ -36,6 +37,9 @@ export default function App() {
         <Grid />
       </main>
       <FavoritesViewer />
+      <Routes>
+        <Route path="/" element={<Navigate to="/settings" replace />} />
+      </Routes>
     </div>
   )
 }

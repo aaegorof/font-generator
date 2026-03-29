@@ -20,14 +20,14 @@ export function generateAllTiles(
   const n = Math.max(numInputs, 1)
   const combinations: string[][] = []
 
-  if (n <= 2) {
+  if (n === 1) {
+    for (let i = 0; i < activeFonts.length; i++) {
+      combinations.push([activeFonts[i].id])
+    }
+  } else if (n === 2) {
     for (let i = 0; i < activeFonts.length; i++) {
       for (let j = 0; j < activeFonts.length; j++) {
-        if (n === 1) {
-          combinations.push([activeFonts[i].id])
-        } else {
-          combinations.push([activeFonts[i].id, activeFonts[j].id])
-        }
+        combinations.push([activeFonts[i].id, activeFonts[j].id])
       }
     }
   } else {
@@ -44,11 +44,18 @@ export function generateAllTiles(
     }
   }
 
-  return combinations.map((fontIds, idx) => ({
-    id: `tile-${idx}-${fontIds.join('-')}`,
-    imageUrl: images[idx % images.length],
-    fontIds,
-  }))
+  // Every image × every font combination
+  const tiles: TileData[] = []
+  for (const imageUrl of images) {
+    for (const fontIds of combinations) {
+      tiles.push({
+        id: `tile-${tiles.length}-${imageUrl}-${fontIds.join('-')}`,
+        imageUrl,
+        fontIds,
+      })
+    }
+  }
+  return tiles
 }
 
 export function randomizeTiles(
