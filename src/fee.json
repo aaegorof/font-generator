@@ -1,0 +1,39 @@
+{
+  "marketing": {
+    "rate": 0,
+    "enabled": false,
+    "vatRate": 0,
+    "addVatToFee": false,
+    "refundOnReturn": false,
+    "useExclVatBase": false
+  },
+  "commission": {
+    "tiers": null,
+    "enabled": true,
+    "lowRate": 0.1,
+    "vatRate": 0,
+    "highRate": 0.15,
+    "threshold": 10.0,
+    "refundOnReturn": true,
+    "useExclVatBase": false,
+    "addVatToCommission": false,
+    "useTieredCommission": false
+  },
+  "fulfillment": {
+    "enabled": true,
+    "threshold": 10.0,
+    "lowFeeExclVat": 1.67,
+    "applyOnlyToFBO": true,
+    "highFeeExclVat": 2.03,
+    "refundOnReturn": false,
+    "fixedFeeExclVat": 0,
+    "useThresholdBasedFee": true
+  },
+  "returnHandling": {
+    "enabled": false,
+    "vatRate": 0,
+    "feeExclVat": 0,
+    "addVatToFee": false,
+    "applyOnlyToFBO": false
+  }
+}

@@ -5,16 +5,21 @@ import type { FontDef } from '../../../types'
 
 function useFontLoadStatus(fonts: FontDef[]): Set<string> {
   const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set())
+  const fontsRef = useRef(fonts)
+  fontsRef.current = fonts
 
   const check = useCallback(() => {
     const loaded = new Set<string>()
-    for (const font of fonts) {
+    for (const font of fontsRef.current) {
       if (document.fonts.check(`${font.weight} 12px "${font.family}"`)) {
         loaded.add(font.id)
       }
     }
-    setLoadedIds(loaded)
-  }, [fonts])
+    setLoadedIds((prev) => {
+      if (prev.size === loaded.size && [...loaded].every((id) => prev.has(id))) return prev
+      return loaded
+    })
+  }, [])
 
   useEffect(() => {
     document.fonts.ready.then(check)
