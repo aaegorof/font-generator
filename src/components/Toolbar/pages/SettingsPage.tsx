@@ -88,7 +88,7 @@ export function SettingsPage() {
           Add layer
         </button>
       </div>
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-4">
         {textInputs.map((input, idx) => (
           <TextInputPanel
             key={input.id}

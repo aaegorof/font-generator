@@ -19,15 +19,62 @@ interface GoogleFontEntry {
 }
 
 const GOOGLE_FONTS: GoogleFontEntry[] = [
-  { id: 'jost',          name: 'Jost',            family: 'Jost',            weight: 400, loadWeights: [300, 400, 500, 700] },
-  { id: 'bebas-neue',    name: 'Bebas Neue',       family: 'Bebas Neue',      weight: 400, loadWeights: [400] },
-  { id: 'playfair',      name: 'Playfair Display', family: 'Playfair Display',weight: 700, loadWeights: [700, 900] },
-  { id: 'space-grotesk', name: 'Space Grotesk',    family: 'Space Grotesk',   weight: 700, loadWeights: [400, 700] },
-  { id: 'montserrat',    name: 'Montserrat',       family: 'Montserrat',      weight: 700, loadWeights: [400, 700, 900], isActive: false },
-  { id: 'oswald',        name: 'Oswald',           family: 'Oswald',          weight: 700, loadWeights: [400, 600, 700], isActive: false },
-  { id: 'inter',         name: 'Inter',            family: 'Inter',           weight: 400, loadWeights: [300, 400, 600, 700], isActive: false },
-  { id: 'raleway',       name: 'Raleway',          family: 'Raleway',         weight: 700, loadWeights: [400, 700, 900], isActive: false },
-  { id: 'dm-sans',       name: 'DM Sans',          family: 'DM Sans',         weight: 400, loadWeights: [300, 400, 700], isActive: false },
+  { id: 'jost', name: 'Jost', family: 'Jost', weight: 400, loadWeights: [300, 400, 500, 700] },
+  { id: 'bebas-neue', name: 'Bebas Neue', family: 'Bebas Neue', weight: 400, loadWeights: [400] },
+  {
+    id: 'playfair',
+    name: 'Playfair Display',
+    family: 'Playfair Display',
+    weight: 700,
+    loadWeights: [700, 900],
+  },
+  {
+    id: 'space-grotesk',
+    name: 'Space Grotesk',
+    family: 'Space Grotesk',
+    weight: 700,
+    loadWeights: [400, 700],
+  },
+  {
+    id: 'montserrat',
+    name: 'Montserrat',
+    family: 'Montserrat',
+    weight: 700,
+    loadWeights: [400, 700, 900],
+    isActive: false,
+  },
+  {
+    id: 'oswald',
+    name: 'Oswald',
+    family: 'Oswald',
+    weight: 700,
+    loadWeights: [400, 600, 700],
+    isActive: false,
+  },
+  {
+    id: 'inter',
+    name: 'Inter',
+    family: 'Inter',
+    weight: 400,
+    loadWeights: [300, 400, 600, 700],
+    isActive: false,
+  },
+  {
+    id: 'raleway',
+    name: 'Raleway',
+    family: 'Raleway',
+    weight: 700,
+    loadWeights: [400, 700, 900],
+    isActive: false,
+  },
+  {
+    id: 'dm-sans',
+    name: 'DM Sans',
+    family: 'DM Sans',
+    weight: 400,
+    loadWeights: [300, 400, 700],
+    isActive: false,
+  },
 ]
 
 const GOOGLE_FONT_DEFS: FontDef[] = GOOGLE_FONTS.map(({ id, name, family, weight, isActive }) => ({
@@ -38,8 +85,6 @@ const GOOGLE_FONT_DEFS: FontDef[] = GOOGLE_FONTS.map(({ id, name, family, weight
   source: 'google' as const,
   isActive: isActive ?? true,
 }))
-
-
 
 function buildGoogleFontsUrl(fonts: GoogleFontEntry[]): string {
   const params = fonts
@@ -56,14 +101,33 @@ function buildGoogleFontsUrl(fonts: GoogleFontEntry[]): string {
 
 // ─── Local fonts ─────────────────────────────────────────────────────────────
 
-const LOCAL_FONTS: FontDef[] = [
-  { id: 'collidge-bold', name: 'Collidge Bold', family: 'Collidge',  weight: 700, source: 'local', localFile: 'Collidge-Bold', isActive: true },
-  { id: 'radeil-3d',     name: 'Radeil 3D',     family: 'Radeil3D',  weight: 400, source: 'local', localFile: 'Radeil3D',     isActive: true },
-  { id: 'wilker',        name: 'Wilker',         family: 'Wilker',    weight: 400, source: 'local', localFile: 'Wilker',       isActive: true },
-  { id: 'codec-pro',     name: 'Codec Pro',      family: 'CodecPro',  weight: 400, source: 'local', localFile: 'CodecPro',     isActive: true },
-  { id: 'portico',       name: 'Portico',        family: 'Portico',   weight: 400, source: 'local', localFile: 'Portico',      isActive: true },
-  { id: 'gibson',        name: 'Gibson',         family: 'Gibson',    weight: 400, source: 'local', localFile: 'Gibson',       isActive: true },
+const localFontFileNames = [
+  'Collidge-Regular',
+  'Collidge-Rounded',
+  'Radeil3D',
+  'Wilker',
+  'Portico',  
+  'Gibson',
+  'GTL001-Regular',
+  'CodecPro-Regular',
+  'CodecPro-Bold',
+  'CodecPro-Fat',
+  'CodecPro-UltraBlack',
+  'Portico Regular',
+  'Portico Layer',
+  'Portico Rough',
+  'Portico Urban',
 ]
+
+const LOCAL_FONTS: FontDef[] = localFontFileNames.map((fileName) => ({
+  id: fileName.toLowerCase().replace(/ /g, '-'),
+  name: fileName,
+  family: fileName,
+  weight: 400,
+  source: 'local' as const,
+  localFile: fileName,
+  isActive: true,
+}))
 
 export const DEFAULT_FONTS: FontDef[] = [...LOCAL_FONTS, ...GOOGLE_FONT_DEFS]
 

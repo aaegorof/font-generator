@@ -1,9 +1,9 @@
 @reference './index.css';
 
 .app {
-  @apply bg-bg-base flex min-h-screen flex-col;
+  @apply bg-bg-base flex h-screen overflow-hidden;
 }
 
 .app__main {
-  @apply flex-1 overflow-x-hidden;
+  @apply flex-1 overflow-y-auto overflow-x-hidden;
 }

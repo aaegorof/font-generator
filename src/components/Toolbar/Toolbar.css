@@ -1,39 +1,52 @@
 @reference '../../index.css';
 
 .toolbar {
-  @apply sticky top-0 z-[100] flex-shrink-0;
+  @apply sticky top-0 z-[100] flex h-screen flex-shrink-0 flex-col;
   background: var(--color-bg-toolbar);
-  border-bottom: 1px solid var(--color-border-base);
-  transition: all 0.3s ease;
+  border-right: 1px solid var(--color-border-base);
+  width: 280px;
+  transition: width 0.25s ease;
+  overflow: hidden;
+}
+
+.toolbar--closed {
+  width: 44px;
 }
 
 .toolbar__header {
-  @apply flex items-center justify-between gap-3;
-  padding: 0 16px;
+  @apply flex flex-shrink-0 items-center justify-between gap-2;
+  padding: 0 10px;
   height: 48px;
-}
-
-.toolbar__header-left {
-  @apply flex min-w-0 items-center gap-4;
+  border-bottom: 1px solid var(--color-border-base);
 }
 
 .toolbar__brand {
-  @apply text-[12px] font-semibold tracking-[0.12em] whitespace-nowrap uppercase;
+  @apply text-[11px] font-semibold tracking-[0.12em] whitespace-nowrap uppercase overflow-hidden;
   color: var(--color-text-secondary);
+  opacity: 1;
+  transition: opacity 0.15s;
+}
+
+.toolbar--closed .toolbar__brand {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .toolbar__tabs {
-  @apply flex gap-0.5;
+  @apply flex flex-shrink-0 flex-col gap-0.5;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--color-border-base);
 }
 
 .toolbar__tab {
   @apply cursor-pointer rounded border-none text-[12px] font-medium whitespace-nowrap;
   background: none;
   color: var(--color-text-muted);
-  padding: 4px 10px;
+  padding: 6px 10px;
   letter-spacing: 0.04em;
   transition: all 0.15s;
   text-decoration: none;
+  display: block;
 }
 
 .toolbar__tab:hover {
@@ -46,12 +59,14 @@
   background: var(--color-bg-raised);
 }
 
-.toolbar__header-right {
-  @apply flex items-center gap-2;
+.toolbar__actions {
+  @apply flex flex-shrink-0 flex-col gap-1.5;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--color-border-base);
 }
 
 .toolbar__action-btn {
-  @apply flex cursor-pointer items-center gap-1.5 rounded border-none text-[11px] font-semibold tracking-[0.06em] whitespace-nowrap uppercase;
+  @apply flex w-full cursor-pointer items-center gap-1.5 rounded border-none text-[11px] font-semibold tracking-[0.06em] whitespace-nowrap uppercase;
   background: #e8e8e8;
   color: var(--color-bg-toolbar);
   padding: 5px 10px;
@@ -75,7 +90,7 @@
 }
 
 .toolbar__toggle {
-  @apply flex cursor-pointer items-center justify-center rounded border-none p-1.5;
+  @apply flex flex-shrink-0 cursor-pointer items-center justify-center rounded border-none p-1.5;
   background: none;
   color: var(--color-text-muted);
   transition: all 0.15s;
@@ -86,14 +101,17 @@
   background: var(--color-bg-subtle);
 }
 
-/* Body */
+/* Collapsed state — hide tabs, actions, body */
+.toolbar--closed .toolbar__tabs,
+.toolbar--closed .toolbar__actions,
 .toolbar--closed .toolbar__body {
-  @apply hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .toolbar__body {
-  @apply overflow-hidden;
-  border-top: 1px solid var(--color-bg-subtle);
+  @apply flex-1 overflow-y-auto overflow-x-hidden;
+  transition: opacity 0.15s;
 }
 
 .toolbar__panel {
@@ -132,7 +150,7 @@
 /* Controls grid */
 .toolbar__controls-grid {
   @apply grid gap-x-5 gap-y-3;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .toolbar__control {
@@ -320,9 +338,8 @@
 
 /* Fonts */
 .toolbar__font-list {
-  @apply grid gap-2 overflow-y-auto;
-  grid-template-columns: repeat(auto-fill, minmax(max(300px, calc((100% - 3 * 0.5rem) / 3)), 1fr));
-  max-height: 240px;
+  @apply flex flex-col gap-2 overflow-y-auto;
+  max-height: none;
 }
 
 .toolbar__font-item {
@@ -423,9 +440,8 @@
 
 /* Images */
 .toolbar__images-grid {
-  @apply grid gap-1.5 overflow-y-auto;
+  @apply grid gap-1.5;
   grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
-  max-height: 180px;
 }
 
 .toolbar__image-thumb {

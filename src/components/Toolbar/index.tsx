@@ -18,51 +18,51 @@ export function Toolbar() {
   return (
     <div className={`toolbar ${toolbarOpen ? 'toolbar--open' : 'toolbar--closed'}`}>
       <div className="toolbar__header">
-        <div className="toolbar__header-left">
-          <span className="toolbar__brand">Font Generator</span>
-          <nav className="toolbar__tabs">
-            {TABS.map(({ path, label }) => (
-              <NavLink
-                key={path}
-                to={path}
-                className={({ isActive }) =>
-                  `toolbar__tab ${isActive && toolbarOpen ? 'toolbar__tab--active' : ''}`
-                }
-                onClick={() => {
-                  if (!toolbarOpen) toggleToolbar()
-                }}
-              >
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
-        <div className="toolbar__header-right">
-          {favorites.length > 0 && (
-            <button className="toolbar__action-btn" onClick={() => openFavoritesView(0)}>
-              <HeartIcon />
-              <span>{favorites.length}</span>
-            </button>
-          )}
-          <button className="toolbar__action-btn toolbar__action-btn--outline" onClick={randomize}>
-            <ShuffleIcon />
-            <span>Randomize</span>
-          </button>
-          <button
-            className="toolbar__action-btn toolbar__action-btn--outline"
-            onClick={generateTiles}
+        <span className="toolbar__brand">Font Generator</span>
+        <button
+          className="toolbar__toggle"
+          onClick={toggleToolbar}
+          title={toolbarOpen ? 'Collapse' : 'Expand'}
+        >
+          <ChevronIcon open={toolbarOpen} />
+        </button>
+      </div>
+
+      <nav className="toolbar__tabs">
+        {TABS.map(({ path, label }) => (
+          <NavLink
+            key={path}
+            to={path}
+            className={({ isActive }) =>
+              `toolbar__tab ${isActive && toolbarOpen ? 'toolbar__tab--active' : ''}`
+            }
+            onClick={() => {
+              if (!toolbarOpen) toggleToolbar()
+            }}
           >
-            <RefreshIcon />
-            <span>Reset</span>
+            {label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="toolbar__actions">
+        {favorites.length > 0 && (
+          <button className="toolbar__action-btn" onClick={() => openFavoritesView(0)}>
+            <HeartIcon />
+            <span>{favorites.length}</span>
           </button>
-          <button
-            className="toolbar__toggle"
-            onClick={toggleToolbar}
-            title={toolbarOpen ? 'Collapse' : 'Expand'}
-          >
-            <ChevronIcon open={toolbarOpen} />
-          </button>
-        </div>
+        )}
+        <button className="toolbar__action-btn toolbar__action-btn--outline" onClick={randomize}>
+          <ShuffleIcon />
+          <span>Randomize</span>
+        </button>
+        <button
+          className="toolbar__action-btn toolbar__action-btn--outline"
+          onClick={generateTiles}
+        >
+          <RefreshIcon />
+          <span>Reset</span>
+        </button>
       </div>
 
       <div className="toolbar__body">
@@ -83,10 +83,10 @@ function ChevronIcon({ open }: { open: boolean }) {
       height="16"
       viewBox="0 0 16 16"
       fill="none"
-      style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+      style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.25s' }}
     >
       <path
-        d="M4 6l4 4 4-4"
+        d="M6 4l4 4-4 4"
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
