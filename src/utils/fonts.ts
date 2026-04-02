@@ -104,19 +104,16 @@ function buildGoogleFontsUrl(fonts: GoogleFontEntry[]): string {
 const localFontFileNames = [
   'Collidge-Regular',
   'Collidge-Rounded',
-  'Radeil3D',
-  'Wilker',
-  'Portico',  
   'Gibson',
   'GTL001-Regular',
   'CodecPro-Regular',
   'CodecPro-Bold',
   'CodecPro-Fat',
   'CodecPro-UltraBlack',
-  'Portico Regular',
-  'Portico Layer',
-  'Portico Rough',
-  'Portico Urban',
+  'Portico-Regular',
+  'Portico-Layer',
+  'Portico-Rough',
+  'Portico-Urban',
 ]
 
 const LOCAL_FONTS: FontDef[] = localFontFileNames.map((fileName) => ({
@@ -160,7 +157,8 @@ export function injectLocalFontFaces(fonts: FontDef[]) {
   src: local('${f.name}'),
        url('/fonts/${f.localFile}.woff2') format('woff2'),
        url('/fonts/${f.localFile}.woff') format('woff'),
-       url('/fonts/${f.localFile}.ttf') format('truetype');
+       url('/fonts/${f.localFile}.ttf') format('truetype'),
+       url('/fonts/${f.localFile}.otf') format('opentype');
   font-weight: ${f.weight};
   font-display: swap;
 }`,
@@ -188,9 +186,16 @@ export function injectUploadedFont(font: FontDef) {
 }
 
 export async function loadFontFile(file: File): Promise<FontDef> {
-  const url = URL.createObjectURL(file)
-  const baseName = file.name.replace(/\.(woff2?|ttf|otf)$/i, '')
-  const family = baseName.replace(/[-_]/g, ' ')
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const res = await fetch('/upload-font', { method: 'POST', body: formData })
+  if (!res.ok) {
+    const { error } = await res.json().catch(() => ({ error: res.statusText }))
+    throw new Error(error ?? 'Upload failed')
+  }
+
+  const { family, url } = (await res.json()) as { filename: string; family: string; url: string }
 
   const fontFace = new FontFace(family, `url(${url})`)
   await fontFace.load()
