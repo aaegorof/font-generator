@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useStore } from '../../store/useStore'
+import { useFontFilter } from '../../hooks/useFontFilter'
 import { exportTileAsPng } from '../../utils/exportTile'
 import './FavoritesViewer.css'
 
@@ -13,6 +14,7 @@ export function FavoritesViewer() {
     removeFavorite,
     fonts,
   } = useStore()
+  const { setFilter } = useFontFilter()
 
   const slideRef = useRef<HTMLDivElement>(null)
 
@@ -144,7 +146,15 @@ export function FavoritesViewer() {
         <div className="fav-viewer__meta">
           <div className="fav-viewer__fonts">
             {tile.fontIds.slice(0, textInputs.length).map((fId, i) => (
-              <span key={i} className="fav-viewer__font-tag">
+              <button
+                key={i}
+                className="fav-viewer__font-tag"
+                onClick={() => {
+                  setFilter(i, fId)
+                  closeFavoritesView()
+                }}
+                title={`Filter by ${getFontName(fId)} (layer ${i + 1})`}
+              >
                 <span
                   className="fav-viewer__font-preview"
                   style={{ fontFamily: getFontFamily(fId), fontWeight: getFontWeight(fId) }}
@@ -152,7 +162,7 @@ export function FavoritesViewer() {
                   Aa
                 </span>
                 {getFontName(fId)}
-              </span>
+              </button>
             ))}
           </div>
 

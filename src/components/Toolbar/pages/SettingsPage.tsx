@@ -1,6 +1,5 @@
-import React, { useCallback, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useStore } from '../../../store/useStore'
-import { exportAllSettings, parseSettingsFile } from '../../../utils/exportSettings'
 import type { TextInput } from '../../../types'
 
 export function SettingsPage() {
@@ -11,43 +10,7 @@ export function SettingsPage() {
     addTextInput,
     removeTextInput,
     updateTextInput,
-    fonts,
-    images,
-    favorites,
-    toolbarOpen,
-    importAllSettings,
   } = useStore()
-
-  const importSettingsRef = useRef<HTMLInputElement>(null)
-  const [exporting, setExporting] = useState(false)
-
-  const handleExportSettings = useCallback(async () => {
-    setExporting(true)
-    try {
-      await exportAllSettings({ settings, textInputs, fonts, images, favorites, toolbarOpen })
-    } catch (err) {
-      console.error('Export error:', err)
-    } finally {
-      setExporting(false)
-    }
-  }, [settings, textInputs, fonts, images, favorites, toolbarOpen])
-
-  const handleImportSettings = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (!file) return
-      try {
-        const data = await parseSettingsFile(file)
-        importAllSettings(data)
-      } catch (err) {
-        console.error('Import error:', err)
-        alert('Failed to import settings. Make sure the file is a valid export.')
-      } finally {
-        if (importSettingsRef.current) importSettingsRef.current.value = ''
-      }
-    },
-    [importAllSettings],
-  )
 
   return (
     <div className="toolbar__panel">
@@ -101,33 +64,6 @@ export function SettingsPage() {
         ))}
       </div>
 
-      <div className="toolbar__section toolbar__section--transfer">
-        <label className="toolbar__label">Transfer Settings</label>
-        <div className="toolbar__transfer-row">
-          <button
-            className="toolbar__upload-btn toolbar__upload-btn--export"
-            onClick={handleExportSettings}
-            disabled={exporting}
-          >
-            <ExportIcon />
-            {exporting ? 'Exporting…' : 'Export'}
-          </button>
-          <input
-            ref={importSettingsRef}
-            type="file"
-            accept=".json"
-            style={{ display: 'none' }}
-            onChange={handleImportSettings}
-          />
-          <button
-            className="toolbar__upload-btn toolbar__upload-btn--import"
-            onClick={() => importSettingsRef.current?.click()}
-          >
-            <ImportIcon />
-            Import
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
@@ -391,22 +327,3 @@ function AlignBottomIcon() {
   )
 }
 
-function ExportIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-      <polyline points="17 8 12 3 7 8" />
-      <line x1="12" y1="3" x2="12" y2="15" />
-    </svg>
-  )
-}
-
-function ImportIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  )
-}

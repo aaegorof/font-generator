@@ -13,34 +13,45 @@ export function generateAllTiles(
   fonts: FontDef[],
   images: string[],
   numInputs: number,
+  layerPins: Record<number, string> = {},
 ): TileData[] {
   const activeFonts = fonts.filter((f) => f.isActive !== false)
   if (activeFonts.length === 0 || images.length === 0) return []
 
   const n = Math.max(numInputs, 1)
+
+  const layerPools: string[][] = Array.from({ length: n }, (_, i) => {
+    const pinId = layerPins[i]
+    if (pinId) {
+      const pinFont = activeFonts.find((f) => f.id === pinId)
+      return pinFont ? [pinFont.id] : activeFonts.map((f) => f.id)
+    }
+    return activeFonts.map((f) => f.id)
+  })
+
   const combinations: string[][] = []
 
   if (n === 1) {
-    for (let i = 0; i < activeFonts.length; i++) {
-      combinations.push([activeFonts[i].id])
+    for (const id of layerPools[0]) {
+      combinations.push([id])
     }
   } else if (n === 2) {
-    for (let i = 0; i < activeFonts.length; i++) {
-      for (let j = 0; j < activeFonts.length; j++) {
-        combinations.push([activeFonts[i].id, activeFonts[j].id])
+    for (const id0 of layerPools[0]) {
+      for (const id1 of layerPools[1]) {
+        combinations.push([id0, id1])
       }
     }
   } else {
-    for (let i = 0; i < activeFonts.length; i++) {
-      for (let j = 0; j < activeFonts.length; j++) {
-        const combo: string[] = [activeFonts[i].id, activeFonts[j].id]
+    outer: for (const id0 of layerPools[0]) {
+      for (const id1 of layerPools[1]) {
+        const combo: string[] = [id0, id1]
         for (let k = 2; k < n; k++) {
-          combo.push(activeFonts[Math.floor(Math.random() * activeFonts.length)].id)
+          const pool = layerPools[k]
+          combo.push(pool[Math.floor(Math.random() * pool.length)])
         }
         combinations.push(combo)
-        if (combinations.length >= 100) break
+        if (combinations.length >= 100) break outer
       }
-      if (combinations.length >= 100) break
     }
   }
 
@@ -63,6 +74,7 @@ export function randomizeTiles(
   images: string[],
   numInputs: number,
   count: number = 50,
+  layerPins: Record<number, string> = {},
 ): TileData[] {
   const activeFonts = fonts.filter((f) => f.isActive !== false)
   if (activeFonts.length === 0 || images.length === 0) return []
@@ -73,7 +85,12 @@ export function randomizeTiles(
   return Array.from({ length: count }, (_, idx) => ({
     id: `rand-${idx}-${Date.now()}`,
     imageUrl: shuffledImages[idx % shuffledImages.length],
-    fontIds: Array.from({ length: n }, () => {
+    fontIds: Array.from({ length: n }, (__, i) => {
+      const pinId = layerPins[i]
+      if (pinId) {
+        const pinFont = activeFonts.find((f) => f.id === pinId)
+        if (pinFont) return pinFont.id
+      }
       return activeFonts[Math.floor(Math.random() * activeFonts.length)].id
     }),
   }))

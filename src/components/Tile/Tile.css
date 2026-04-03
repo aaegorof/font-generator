@@ -101,6 +101,14 @@
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(4px);
   padding: 2px 6px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.tile__font-label:hover {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.75);
 }
 
 /* Favorite badge */

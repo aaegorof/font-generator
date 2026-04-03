@@ -5,5 +5,5 @@
 }
 
 .app__main {
-  @apply flex-1 overflow-y-auto overflow-x-hidden;
+  @apply flex-1 overflow-y-auto overflow-x-hidden flex flex-col;
 }

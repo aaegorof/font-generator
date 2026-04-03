@@ -1,8 +1,37 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { useStore } from '../../../store/useStore'
 
+function EyeIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M7 3C4.2 3 1.8 4.8 1 7c.8 2.2 3.2 4 6 4s5.2-1.8 6-4c-.8-2.2-3.2-4-6-4z"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+      <circle cx="7" cy="7" r="1.8" stroke="currentColor" strokeWidth="1.2" />
+    </svg>
+  )
+}
+
+function EyeOffIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M2 2l10 10M5.5 5.6A1.8 1.8 0 009.4 8.5M3.2 3.7C2 4.6 1.3 5.8 1 7c.8 2.2 3.2 4 6 4 1.1 0 2.1-.3 3-.7M5 3.2C5.6 3.1 6.3 3 7 3c2.8 0 5.2 1.8 6 4-.3.9-.9 1.7-1.6 2.3"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export function ImagesPage() {
-  const { settings, updateSettings, images, addImage } = useStore()
+  const { settings, updateSettings, images, disabledImages, toggleImageDisabled, addImage } =
+    useStore()
 
   const imageUploadRef = useRef<HTMLInputElement>(null)
   const [urlInput, setUrlInput] = useState('')
@@ -57,17 +86,33 @@ export function ImagesPage() {
       </div>
 
       <div className="toolbar__images-grid">
-        {images.map((img, idx) => (
-          <div key={idx} className="toolbar__image-thumb">
-            <img src={img} alt="" loading="lazy" />
-            <button
-              className="toolbar__image-remove"
-              onClick={() => useStore.getState().removeImage(img)}
+        {images.map((img, idx) => {
+          const isDisabled = disabledImages.includes(img)
+          return (
+            <div
+              key={idx}
+              className={`toolbar__image-thumb${isDisabled ? ' toolbar__image-thumb--disabled' : ''}`}
             >
-              ×
-            </button>
-          </div>
-        ))}
+              <img src={img} alt="" loading="lazy" />
+              <div className="toolbar__image-actions">
+                <button
+                  className="toolbar__image-toggle"
+                  onClick={() => toggleImageDisabled(img)}
+                  title={isDisabled ? 'Enable' : 'Disable'}
+                >
+                  {isDisabled ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+                <button
+                  className="toolbar__image-remove"
+                  onClick={() => useStore.getState().removeImage(img)}
+                  title="Delete"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       <div className="toolbar__image-add">

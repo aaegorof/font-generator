@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, memo } from 'react'
 import { useStore } from '../../store/useStore'
+import { useFontFilter } from '../../hooks/useFontFilter'
 import { exportTileAsPng } from '../../utils/exportTile'
 import type { TileData } from '../../types'
 import './Tile.css'
@@ -19,6 +20,7 @@ export const Tile = memo(function Tile({ tile, favoriteIndex }: TileProps) {
     favorites,
     randomizeSingleTile,
   } = useStore()
+  const { setFilter } = useFontFilter()
 
   const tileRef = useRef<HTMLDivElement>(null)
 
@@ -165,9 +167,17 @@ export const Tile = memo(function Tile({ tile, favoriteIndex }: TileProps) {
 
       <div className="tile__font-labels">
         {tile.fontIds.slice(0, textInputs.length).map((fId, i) => (
-          <span key={i} className="tile__font-label">
+          <button
+            key={i}
+            className="tile__font-label"
+            onClick={(e) => {
+              e.stopPropagation()
+              setFilter(i, fId)
+            }}
+            title={`Filter by ${getFontName(fId)} (layer ${i + 1})`}
+          >
             {getFontName(fId)}
-          </span>
+          </button>
         ))}
       </div>
 

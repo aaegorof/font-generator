@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../../store/useStore'
 import { loadFontFile, injectUploadedFont } from '../../../utils/fonts'
 import type { FontDef } from '../../../types'
@@ -35,8 +35,20 @@ function useFontLoadStatus(fonts: FontDef[]): Set<string> {
 }
 
 export function FontsPage() {
-  const { fonts, toggleFontActive, removeFont, addFont } = useStore()
+  const { fonts, toggleFontActive, removeFont, addFont, textInputs, layerFontPins, setLayerFontPin } = useStore()
   const loadedFontIds = useFontLoadStatus(fonts)
+  const activeFonts = useMemo(() => fonts.filter((f) => f.isActive !== false), [fonts])
+
+  const [query, setQuery] = useState('')
+
+  const filteredFonts = useMemo(() => {
+    const active = fonts.filter((f) => f.isActive !== false)
+    const inactive = fonts.filter((f) => f.isActive === false)
+    const sorted = [...active, ...inactive]
+    if (!query.trim()) return sorted
+    const q = query.toLowerCase()
+    return sorted.filter((f) => f.name.toLowerCase().includes(q))
+  }, [fonts, query])
 
   const fontUploadRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
@@ -64,8 +76,47 @@ export function FontsPage() {
 
   return (
     <div className="toolbar__panel">
+      <div className="toolbar__font-search">
+        <input
+          className="toolbar__font-search-input"
+          type="text"
+          placeholder="Search fonts…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {query && (
+          <button className="toolbar__font-search-clear" onClick={() => setQuery('')}>
+            ×
+          </button>
+        )}
+      </div>
+
+      {textInputs.length > 1 && (
+        <div className="toolbar__layer-pins">
+          <span className="toolbar__label">Layer Pins</span>
+          {textInputs.map((_, i) => {
+            const pinnedId = layerFontPins[i] ?? null
+            return (
+              <div key={i} className="toolbar__layer-pin-row">
+                <span className="toolbar__layer-pin-label">Layer {i + 1}</span>
+                <select
+                  className="toolbar__layer-pin-select"
+                  value={pinnedId ?? ''}
+                  onChange={(e) => setLayerFontPin(i, e.target.value || null)}
+                >
+                  <option value="">All active</option>
+                  {activeFonts.map((f) => (
+                    <option key={f.id} value={f.id}>{f.name}</option>
+                  ))}
+                </select>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       <div className="toolbar__font-list">
-        {fonts.map((font) => (
+        {filteredFonts.map((font) => (
           <div
             key={font.id}
             className={`toolbar__font-item ${font.isActive !== false ? 'toolbar__font-item--active' : ''}`}

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Toolbar } from './components/Toolbar'
 import { Grid } from './components/Grid'
+import { StatusBar } from './components/StatusBar'
 import { FavoritesViewer } from './components/FavoritesViewer'
 import { useStore } from './store/useStore'
 import { setupGoogleFonts, injectLocalFontFaces, injectUploadedFont } from './utils/fonts'
@@ -34,6 +35,7 @@ export default function App() {
     <div className="app">
       <Toolbar />
       <main className="app__main">
+        <StatusBar />
         <Grid />
       </main>
       <FavoritesViewer />
