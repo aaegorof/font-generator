@@ -59,36 +59,6 @@
   background: var(--color-bg-raised);
 }
 
-.toolbar__actions {
-  @apply flex flex-shrink-0 flex-col gap-1.5;
-  padding: 8px 6px;
-  border-bottom: 1px solid var(--color-border-base);
-}
-
-.toolbar__action-btn {
-  @apply flex w-full cursor-pointer items-center gap-1.5 rounded border-none text-[11px] font-semibold tracking-[0.06em] whitespace-nowrap uppercase;
-  background: #e8e8e8;
-  color: var(--color-bg-toolbar);
-  padding: 5px 10px;
-  transition: all 0.15s;
-}
-
-.toolbar__action-btn:hover {
-  background: #fff;
-}
-
-.toolbar__action-btn--outline {
-  @apply bg-transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-muted);
-}
-
-.toolbar__action-btn--outline:hover {
-  color: var(--color-text-light);
-  border-color: var(--color-border-hover);
-  background: var(--color-bg-subtle);
-}
-
 .toolbar__toggle {
   @apply flex flex-shrink-0 cursor-pointer items-center justify-center rounded border-none p-1.5;
   background: none;
@@ -103,7 +73,6 @@
 
 /* Collapsed state — hide tabs, actions, body */
 .toolbar--closed .toolbar__tabs,
-.toolbar--closed .toolbar__actions,
 .toolbar--closed .toolbar__body {
   opacity: 0;
   pointer-events: none;

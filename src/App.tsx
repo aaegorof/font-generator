@@ -5,19 +5,31 @@ import { Grid } from './components/Grid'
 import { StatusBar } from './components/StatusBar'
 import { FavoritesViewer } from './components/FavoritesViewer'
 import { useStore } from './store/useStore'
-import { setupGoogleFonts, injectLocalFontFaces, injectUploadedFont } from './utils/fonts'
+import {
+  fetchLocalFonts,
+  setupGoogleFonts,
+  injectLocalFontFaces,
+  injectUploadedFont,
+} from './utils/fonts'
 import './App.css'
 
 export default function App() {
-  const { fonts, generateTiles, tiles } = useStore()
+  const { fonts } = useStore()
 
   useEffect(() => {
     // Set up fonts
     setupGoogleFonts()
-    injectLocalFontFaces(fonts)
+    fetchLocalFonts().then((localFonts) => {
+      useStore.getState().setLocalFonts(localFonts)
+    })
+
+    const { fonts: currentFonts, generateTiles, tiles } = useStore.getState()
+    injectLocalFontFaces(currentFonts)
 
     // Inject uploaded fonts
-    fonts.filter((f) => f.source === 'upload' && f.uploadUrl).forEach((f) => injectUploadedFont(f))
+    currentFonts
+      .filter((f) => f.source === 'upload' && f.uploadUrl)
+      .forEach((f) => injectUploadedFont(f))
 
     // Generate initial tiles if none exist
     if (tiles.length === 0) {

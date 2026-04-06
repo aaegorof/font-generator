@@ -8,6 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/upload-font': 'http://localhost:3001',
+      '/list-fonts': 'http://localhost:3001',
     },
   },
 })

@@ -1,4 +1,5 @@
 import express from 'express'
+import fs from 'fs'
 import multer from 'multer'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -25,6 +26,23 @@ const upload = multer({
 
 const app = express()
 const PORT = 3001
+const FONT_EXTENSIONS = new Set(['.woff', '.woff2', '.ttf', '.otf'])
+
+app.get('/list-fonts', (_req, res) => {
+  try {
+    const files = fs.readdirSync(FONTS_DIR)
+    const stems = new Set(
+      files
+        .filter((fileName) => FONT_EXTENSIONS.has(path.extname(fileName).toLowerCase()))
+        .map((fileName) => fileName.replace(/\.(woff2?|ttf|otf)$/i, '')),
+    )
+
+    res.json([...stems])
+  } catch (error) {
+    console.error('Failed to read local fonts directory:', error)
+    res.status(500).json({ error: 'Failed to list fonts' })
+  }
+})
 
 app.post('/upload-font', upload.single('file'), (req, res) => {
   if (!req.file) {

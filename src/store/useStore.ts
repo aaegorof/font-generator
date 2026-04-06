@@ -54,6 +54,7 @@ interface AppActions {
   updateTextInput: (id: string, partial: Partial<Omit<TextInput, 'id'>>) => void
 
   addFont: (font: FontDef) => void
+  setLocalFonts: (fonts: FontDef[]) => void
   removeFont: (id: string) => void
   toggleFontActive: (id: string) => void
   setLayerFontPin: (layerIndex: number, fontId: string | null) => void
@@ -135,6 +136,20 @@ export const useStore = create<AppStore>()(
         // Fonts
         addFont: (font) => {
           set((state) => ({ fonts: [...state.fonts, font] }))
+          const { fonts, textInputs, layerFontPins } = get()
+          set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
+        },
+        setLocalFonts: (localFonts) => {
+          set((state) => {
+            const nonLocalFonts = state.fonts.filter((font) => font.source !== 'local')
+            const fonts = [...nonLocalFonts, ...localFonts]
+            const validFontIds = new Set(fonts.map((font) => font.id))
+            const layerFontPins = Object.fromEntries(
+              Object.entries(state.layerFontPins).filter(([, fontId]) => validFontIds.has(fontId)),
+            )
+
+            return { fonts, layerFontPins }
+          })
           const { fonts, textInputs, layerFontPins } = get()
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
         },

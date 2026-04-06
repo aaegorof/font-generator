@@ -99,34 +99,7 @@ function buildGoogleFontsUrl(fonts: GoogleFontEntry[]): string {
   return `https://fonts.googleapis.com/css2?${params}&display=swap`
 }
 
-// ─── Local fonts ─────────────────────────────────────────────────────────────
-
-const localFontFileNames = [
-  'Collidge-Regular',
-  'Collidge-Rounded',
-  'Gibson',
-  'GTL001-Regular',
-  'CodecPro-Regular',
-  'CodecPro-Bold',
-  'CodecPro-Fat',
-  'CodecPro-UltraBlack',
-  'Portico-Regular',
-  'Portico-Layer',
-  'Portico-Rough',
-  'Portico-Urban',
-]
-
-const LOCAL_FONTS: FontDef[] = localFontFileNames.map((fileName) => ({
-  id: fileName.toLowerCase().replace(/ /g, '-'),
-  name: fileName,
-  family: fileName,
-  weight: 400,
-  source: 'local' as const,
-  localFile: fileName,
-  isActive: true,
-}))
-
-export const DEFAULT_FONTS: FontDef[] = [...LOCAL_FONTS, ...GOOGLE_FONT_DEFS]
+export const DEFAULT_FONTS: FontDef[] = [...GOOGLE_FONT_DEFS]
 
 // ─── Setup ───────────────────────────────────────────────────────────────────
 
@@ -148,7 +121,6 @@ export function injectLocalFontFaces(fonts: FontDef[]) {
     style.id = styleId
     document.head.appendChild(style)
   }
-
   const rules = fonts
     .filter((f) => f.source === 'local' && f.localFile)
     .map(
@@ -183,6 +155,29 @@ export function injectUploadedFont(font: FontDef) {
   font-weight: ${font.weight};
   font-display: swap;
 }`
+}
+
+export async function fetchLocalFonts(): Promise<FontDef[]> {
+  try {
+    const res = await fetch('/list-fonts')
+    if (!res.ok) {
+      throw new Error(`Failed to fetch local fonts: ${res.status}`)
+    }
+
+    const stems = (await res.json()) as string[]
+    return stems.map((stem) => ({
+      id: stem.toLowerCase().replace(/ /g, '-'),
+      name: stem,
+      family: stem,
+      weight: 400,
+      source: 'local',
+      localFile: stem,
+      isActive: true,
+    }))
+  } catch (error) {
+    console.warn('Local fonts scan unavailable; continuing with Google fonts only.', error)
+    return []
+  }
 }
 
 export async function loadFontFile(file: File): Promise<FontDef> {
