@@ -1,6 +1,6 @@
 # Story 5.1 — Physical Image Upload to Disk
 
-**Status:** ready-for-dev  
+**Status:** done  
 **Priority:** Medium  
 **Estimate:** ~1.5 hours
 
@@ -51,11 +51,46 @@ As Artemiy, when I upload an image file through the Images panel, I want it to b
 
 ## Acceptance Criteria
 
-- [ ] Uploading `photo.jpg` saves the file in `public/images/photo.jpg`.
-- [ ] The image appears in the grid and remains visible after a full page reload.
-- [ ] Uploading `photo.jpg` a second time shows an inline error and does not duplicate the file.
-- [ ] Pasting a URL and clicking Add continues to work without any server round-trip.
-- [ ] No blob URLs are ever stored in the state after this change.
+- [x] Uploading `photo.jpg` saves the file in `public/images/photo.jpg`.
+- [x] The image appears in the grid and remains visible after a full page reload.
+- [x] Uploading `photo.jpg` a second time shows an inline error and does not duplicate the file.
+- [x] Pasting a URL and clicking Add continues to work without any server round-trip.
+- [x] No blob URLs are ever stored in the state after this change.
+
+---
+
+## Dev Agent Record
+
+### Implemented
+
+- `server.js`: `public/images` ensured at startup; `multer.diskStorage` for images with duplicate check before write (`409` + `{ error: "File already exists" }`); MIME allowlist per story; `POST /upload-image` returns `{ url: "/images/<filename>" }`; `GET /images/*` via `express.static`; `app` exported for tests; listen only when run as main module.
+- `vite.config.ts` + `vitest.config.ts`: proxy `/upload-image` and `/images` to `localhost:3001`; Vitest merged from separate config to keep `tsc -b` clean.
+- `ImagesPage.tsx`: `fetch('/upload-image', FormData)` + `Promise.allSettled`; `uploadError` + `role="alert"` below upload button; URL paste path unchanged.
+- Tests: `server.test.ts` (supertest: save + 409); `ImagesPage.test.tsx` (mocked fetch: success, 409, partial batch).
+- `server.d.ts`: typings for server exports; `public/images/.gitkeep`; `Toolbar.css` `.toolbar__upload-error`.
+
+### Tests
+
+- `npm run test` — all green (5 tests).
+
+### Decisions
+
+- Vitest config split from `vite.config.ts` to avoid `UserConfig` / `test` typing issues with `tsc -b`.
+
+### File List
+
+- `server.js`
+- `server.d.ts`
+- `server.test.ts`
+- `vite.config.ts`
+- `vitest.config.ts`
+- `tsconfig.node.json`
+- `package.json`
+- `public/images/.gitkeep`
+- `src/components/Toolbar/pages/ImagesPage.tsx`
+- `src/components/Toolbar/pages/ImagesPage.test.tsx`
+- `src/components/Toolbar/Toolbar.css`
+- `src/test/setup.ts`
 
 ---
 

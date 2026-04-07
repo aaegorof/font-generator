@@ -35,14 +35,45 @@ export function ImagesPage() {
 
   const imageUploadRef = useRef<HTMLInputElement>(null)
   const [urlInput, setUrlInput] = useState('')
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   const handleImageUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || [])
-      files.forEach((file) => {
-        const url = URL.createObjectURL(file)
-        addImage(url)
-      })
+      if (files.length === 0) return
+
+      setUploadError(null)
+
+      const results = await Promise.allSettled(
+        files.map(async (file) => {
+          const formData = new FormData()
+          formData.append('file', file)
+          const res = await fetch('/upload-image', { method: 'POST', body: formData })
+          const data = (await res.json().catch(() => ({}))) as { error?: string; url?: string }
+          if (res.status === 409) {
+            throw new Error(data.error ?? 'File already exists')
+          }
+          if (!res.ok) {
+            throw new Error(data.error ?? 'Upload failed')
+          }
+          if (!data.url) throw new Error('Upload failed')
+          return data.url
+        }),
+      )
+
+      const errors: string[] = []
+      for (let i = 0; i < results.length; i++) {
+        const r = results[i]
+        const file = files[i]
+        if (r.status === 'fulfilled') {
+          addImage(r.value)
+        } else {
+          const msg = r.reason instanceof Error ? r.reason.message : 'Upload failed'
+          errors.push(`${file.name}: ${msg}`)
+        }
+      }
+
+      setUploadError(errors.length > 0 ? errors.join('; ') : null)
       if (imageUploadRef.current) imageUploadRef.current.value = ''
     },
     [addImage],
@@ -127,6 +158,11 @@ export function ImagesPage() {
         <button className="toolbar__upload-btn" onClick={() => imageUploadRef.current?.click()}>
           + Upload Image
         </button>
+        {uploadError ? (
+          <p className="toolbar__upload-error" role="alert">
+            {uploadError}
+          </p>
+        ) : null}
         <div className="toolbar__url-row">
           <input
             className="toolbar__url-input"

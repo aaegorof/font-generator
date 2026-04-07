@@ -6,6 +6,10 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const FONTS_DIR = path.join(__dirname, 'public/fonts')
+const IMAGES_DIR = path.join(__dirname, 'public/images')
+
+fs.mkdirSync(FONTS_DIR, { recursive: true })
+fs.mkdirSync(IMAGES_DIR, { recursive: true })
 
 const storage = multer.diskStorage({
   destination: FONTS_DIR,
@@ -24,9 +28,44 @@ const upload = multer({
   },
 })
 
+const ALLOWED_IMAGE_MIMES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
+])
+
+const imageStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, IMAGES_DIR)
+  },
+  filename: (_req, file, cb) => {
+    const target = path.join(IMAGES_DIR, file.originalname)
+    if (fs.existsSync(target)) {
+      const err = new Error('File already exists')
+      err.code = 'DUPLICATE'
+      cb(err)
+      return
+    }
+    cb(null, file.originalname)
+  },
+})
+
+const imageUpload = multer({
+  storage: imageStorage,
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_IMAGE_MIMES.has(file.mimetype)) cb(null, true)
+    else cb(new Error('Invalid image type'))
+  },
+})
+
 const app = express()
 const PORT = 3001
 const FONT_EXTENSIONS = new Set(['.woff', '.woff2', '.ttf', '.otf'])
+
+app.use('/uploaded-images', express.static(IMAGES_DIR))
 
 app.get('/list-fonts', (_req, res) => {
   try {
@@ -62,6 +101,48 @@ app.post('/upload-font', upload.single('file'), (req, res) => {
   })
 })
 
-app.listen(PORT, () => {
-  console.log(`Font upload server → http://localhost:${PORT}`)
+app.post('/upload-image', (req, res, next) => {
+  imageUpload.single('file')(req, res, (err) => {
+    if (err) {
+      if (err.code === 'DUPLICATE' || err.message === 'File already exists') {
+        res.status(409).json({ error: 'File already exists' })
+        return
+      }
+      if (err instanceof multer.MulterError) {
+        res.status(400).json({ error: err.message })
+        return
+      }
+      if (err.message === 'Invalid image type') {
+        res.status(400).json({ error: err.message })
+        return
+      }
+      next(err)
+      return
+    }
+
+    if (!req.file) {
+      res.status(400).json({ error: 'No file uploaded' })
+      return
+    }
+
+    res.json({ url: `/uploaded-images/${req.file.filename}` })
+  })
 })
+
+function isMainModule() {
+  const entry = process.argv[1]
+  if (!entry) return false
+  try {
+    return fileURLToPath(import.meta.url) === path.resolve(entry)
+  } catch {
+    return false
+  }
+}
+
+if (isMainModule()) {
+  app.listen(PORT, () => {
+    console.log(`Font upload server → http://localhost:${PORT}`)
+  })
+}
+
+export { app, FONTS_DIR, IMAGES_DIR, PORT }
