@@ -21,7 +21,7 @@
 }
 
 .toolbar__brand {
-  @apply text-[11px] font-semibold tracking-[0.12em] whitespace-nowrap uppercase overflow-hidden;
+  @apply overflow-hidden text-[11px] font-semibold tracking-[0.12em] whitespace-nowrap uppercase;
   color: var(--color-text-secondary);
   opacity: 1;
   transition: opacity 0.15s;
@@ -79,7 +79,7 @@
 }
 
 .toolbar__body {
-  @apply flex-1 overflow-y-auto overflow-x-hidden;
+  @apply flex-1 overflow-x-hidden overflow-y-auto;
   transition: opacity 0.15s;
 }
 
@@ -385,7 +385,7 @@
 
 /* Fonts */
 .toolbar__font-list {
-  @apply flex flex-col gap-2 overflow-y-auto;
+  @apply flex flex-col gap-2;
   max-height: none;
 }
 
@@ -428,7 +428,7 @@
 }
 
 .toolbar__font-not-loaded {
-  @apply flex-shrink-0 inline-block rounded-full;
+  @apply inline-block flex-shrink-0 rounded-full;
   width: 6px;
   height: 6px;
   background: var(--color-accent-danger, #e05252);

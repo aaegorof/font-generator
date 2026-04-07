@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import type { FontDef, TileData, Settings, FavoriteItem, TextInput } from '../types'
 import type { SettingsExport } from '../utils/exportSettings'
 import { DEFAULT_FONTS, injectUploadedFont } from '../utils/fonts'
-import { DEFAULT_IMAGES } from '../utils/images'
+import { DEFAULT_IMAGES, isScannedLocalImage } from '../utils/images'
 import { generateAllTiles, randomizeTiles } from '../utils/tileGenerator'
 
 const DEFAULT_SETTINGS: Settings = {
@@ -60,6 +60,7 @@ interface AppActions {
   setLayerFontPin: (layerIndex: number, fontId: string | null) => void
 
   addImage: (url: string) => void
+  setLocalImages: (images: string[]) => void
   removeImage: (url: string) => void
   toggleImageDisabled: (url: string) => void
 
@@ -193,6 +194,17 @@ export const useStore = create<AppStore>()(
         // Images
         addImage: (url) => {
           set((state) => ({ images: [...state.images, url] }))
+          const { fonts, textInputs, layerFontPins } = get()
+          set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
+        },
+        setLocalImages: (localImages) => {
+          set((state) => {
+            const nonLocalImages = state.images.filter((img) => !isScannedLocalImage(img))
+            const images = [...nonLocalImages, ...localImages]
+            const imagesSet = new Set(images)
+            const disabledImages = state.disabledImages.filter((img) => imagesSet.has(img))
+            return { images, disabledImages }
+          })
           const { fonts, textInputs, layerFontPins } = get()
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
         },

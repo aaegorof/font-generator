@@ -11,6 +11,7 @@ import {
   injectLocalFontFaces,
   injectUploadedFont,
 } from './utils/fonts'
+import { fetchLocalImages } from './utils/images'
 import './App.css'
 
 export default function App() {
@@ -21,6 +22,9 @@ export default function App() {
     setupGoogleFonts()
     fetchLocalFonts().then((localFonts) => {
       useStore.getState().setLocalFonts(localFonts)
+    })
+    fetchLocalImages().then((localImages) => {
+      useStore.getState().setLocalImages(localImages)
     })
 
     const { fonts: currentFonts, generateTiles, tiles } = useStore.getState()

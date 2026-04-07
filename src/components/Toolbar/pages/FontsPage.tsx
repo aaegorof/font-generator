@@ -35,7 +35,15 @@ function useFontLoadStatus(fonts: FontDef[]): Set<string> {
 }
 
 export function FontsPage() {
-  const { fonts, toggleFontActive, removeFont, addFont, textInputs, layerFontPins, setLayerFontPin } = useStore()
+  const {
+    fonts,
+    toggleFontActive,
+    removeFont,
+    addFont,
+    textInputs,
+    layerFontPins,
+    setLayerFontPin,
+  } = useStore()
   const loadedFontIds = useFontLoadStatus(fonts)
   const activeFonts = useMemo(() => fonts.filter((f) => f.isActive !== false), [fonts])
 
@@ -75,7 +83,7 @@ export function FontsPage() {
   )
 
   return (
-    <div className="toolbar__panel">
+    <div className="toolbar__panel pb-0">
       <div className="toolbar__font-search">
         <input
           className="toolbar__font-search-input"
@@ -106,7 +114,9 @@ export function FontsPage() {
                 >
                   <option value="">All active</option>
                   {activeFonts.map((f) => (
-                    <option key={f.id} value={f.id}>{f.name}</option>
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -146,10 +156,7 @@ export function FontsPage() {
               </span>
               <span className="toolbar__font-source">{font.source}</span>
               {!loadedFontIds.has(font.id) && (
-                <span
-                  className="toolbar__font-not-loaded"
-                  title="Font is not loaded by browser"
-                />
+                <span className="toolbar__font-not-loaded" title="Font is not loaded by browser" />
               )}
             </button>
             <button
@@ -163,10 +170,9 @@ export function FontsPage() {
         ))}
       </div>
 
-      <div className="toolbar__font-upload">
+      <div className="toolbar__font-upload bg-bg-toolbar sticky bottom-0 pb-4">
         <p className="toolbar__hint">
-          Drop your font files into <code>public/fonts/</code> folder to auto-activate custom
-          fonts.
+          Drop your font files into <code>public/fonts/</code> folder to auto-activate custom fonts.
         </p>
         <input
           ref={fontUploadRef}

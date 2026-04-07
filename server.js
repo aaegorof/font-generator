@@ -64,6 +64,8 @@ const imageUpload = multer({
 const app = express()
 const PORT = 3001
 const FONT_EXTENSIONS = new Set(['.woff', '.woff2', '.ttf', '.otf'])
+const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'])
+const LOCAL_IMAGE_URL_PREFIX = '/images/'
 
 app.use('/uploaded-images', express.static(IMAGES_DIR))
 
@@ -80,6 +82,20 @@ app.get('/list-fonts', (_req, res) => {
   } catch (error) {
     console.error('Failed to read local fonts directory:', error)
     res.status(500).json({ error: 'Failed to list fonts' })
+  }
+})
+
+app.get('/list-images', (_req, res) => {
+  try {
+    const imageUrls = fs
+      .readdirSync(IMAGES_DIR)
+      .filter((fileName) => IMAGE_EXTENSIONS.has(path.extname(fileName).toLowerCase()))
+      .map((fileName) => `${LOCAL_IMAGE_URL_PREFIX}${fileName}`)
+
+    res.json(imageUrls)
+  } catch (error) {
+    console.error('Failed to read local images directory:', error)
+    res.status(500).json({ error: 'Failed to list images' })
   }
 })
 
