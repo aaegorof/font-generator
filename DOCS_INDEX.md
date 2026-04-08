@@ -14,6 +14,7 @@ Complete guide to Font Generator project documentation.
 
 ### Infrastructure
 - **[docs/SUPABASE.md](./docs/SUPABASE.md)** — Supabase setup, database access, and troubleshooting
+- **[docs/STORAGE_SETUP.md](./docs/STORAGE_SETUP.md)** — Storage buckets, RLS policies, and file upload
 - **[docs/GOOGLE_OAUTH_SETUP.md](./docs/GOOGLE_OAUTH_SETUP.md)** — Complete Google OAuth configuration guide
 - **[docs/GOOGLE_OAUTH_QUICKSTART.md](./docs/GOOGLE_OAUTH_QUICKSTART.md)** — Quick 5-minute OAuth setup
 
@@ -62,6 +63,7 @@ Complete guide to Font Generator project documentation.
 
 #### Database & Infrastructure
 - [docs/SUPABASE.md](./docs/SUPABASE.md) — Complete Supabase guide
+- [docs/STORAGE_SETUP.md](./docs/STORAGE_SETUP.md) — Storage buckets and file upload
 - [docs/GOOGLE_OAUTH_SETUP.md](./docs/GOOGLE_OAUTH_SETUP.md) — Google OAuth configuration
 - [docs/GOOGLE_OAUTH_QUICKSTART.md](./docs/GOOGLE_OAUTH_QUICKSTART.md) — Quick OAuth setup
 
@@ -106,7 +108,10 @@ Complete guide to Font Generator project documentation.
 ├── ARCHITECTURE_DIAGRAM.md            # Visual diagrams
 │
 ├── docs/
-│   └── SUPABASE.md                    # Supabase setup and database guide
+│   ├── SUPABASE.md                    # Supabase setup and database guide
+│   ├── STORAGE_SETUP.md               # Storage buckets and file upload
+│   ├── GOOGLE_OAUTH_SETUP.md          # Google OAuth configuration
+│   └── GOOGLE_OAUTH_QUICKSTART.md     # Quick OAuth setup
 │
 ├── public/fonts/
 │   └── README.md                      # Custom fonts guide

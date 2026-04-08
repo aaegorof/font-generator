@@ -33,6 +33,7 @@ npm run format
 
 ### Infrastructure
 - **[docs/SUPABASE.md](./docs/SUPABASE.md)** — Supabase setup and database access
+- **[docs/STORAGE_SETUP.md](./docs/STORAGE_SETUP.md)** — Storage buckets and file upload
 - **[docs/GOOGLE_OAUTH_SETUP.md](./docs/GOOGLE_OAUTH_SETUP.md)** — Google OAuth configuration guide
 
 ## Tech Stack

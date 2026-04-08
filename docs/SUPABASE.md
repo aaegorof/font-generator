@@ -39,7 +39,35 @@ After starting, you can access:
 - **Mailpit (Email Testing)**: http://127.0.0.1:54324
   - View emails sent during development
 
-### 3. Access Database
+### 3. Apply Database Schema
+
+After starting Supabase for the first time, apply the database schema:
+
+```bash
+# Copy migration file to database container
+docker cp supabase/migrations/00001_initial_schema.sql supabase_db_font-generator:/tmp/
+
+# Execute migration
+docker exec supabase_db_font-generator psql -U postgres -d postgres -f /tmp/00001_initial_schema.sql
+```
+
+Or use Supabase Studio:
+1. Open http://127.0.0.1:54323
+2. Go to SQL Editor
+3. Copy contents of `supabase/migrations/00001_initial_schema.sql`
+4. Paste and execute
+
+**Verify schema:**
+
+```bash
+docker exec supabase_db_font-generator psql -U postgres -d postgres -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;"
+```
+
+Expected output: `user_favorites`, `user_fonts`, `user_images`, `user_profiles`
+
+See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for complete schema documentation.
+
+### 4. Access Database
 
 #### Option 1: Supabase Studio (Recommended)
 
@@ -296,17 +324,39 @@ Ensure Docker is running and has enough resources:
 - Run `supabase db reset` to start fresh
 - Check logs with `supabase logs`
 
+## Storage Buckets
+
+Storage buckets are configured for user-uploaded fonts and images.
+
+### Available Buckets
+
+- **user-fonts**: Font file storage (5 MB limit, .woff2/.woff/.ttf)
+- **user-images**: Background image storage (10 MB limit, .jpg/.png/.webp)
+
+Both buckets have:
+- Public read access (anyone can download)
+- RLS-protected write access (users can only upload to their own folder)
+- File size limits and MIME type validation
+
+### Test Storage
+
+```bash
+./scripts/test-storage.sh
+```
+
+For detailed storage documentation, see [STORAGE_SETUP.md](./STORAGE_SETUP.md)
+
 ## Next Steps
 
-1. **Configure Google OAuth** (Story 6.2)
+1. **Configure Google OAuth** (Story 6.2) ✓
    - Set up Google OAuth credentials
    - Configure auth provider in Supabase
 
-2. **Create Database Schema** (Story 6.3)
+2. **Create Database Schema** (Story 6.3) ✓
    - Design tables for fonts, users, generations
    - Set up Row Level Security (RLS)
 
-3. **Configure Storage Buckets** (Story 6.4)
+3. **Configure Storage Buckets** (Story 6.4) ✓
    - Create buckets for fonts and generated images
    - Set up access policies
 
