@@ -1,4 +1,61 @@
-# React + TypeScript + Vite
+# Font Generator
+
+React + TypeScript + Vite application for generating font preview tiles with custom images and text.
+
+## Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server (starts both Vite and Express)
+npm run dev
+
+# Build for production
+npm run build
+
+# Format code
+npm run format
+```
+
+## Documentation
+
+📚 **[DOCS_INDEX.md](./DOCS_INDEX.md)** — Complete documentation index (start here!)
+
+### For Developers
+- **[QUICK_START.md](./QUICK_START.md)** — 5-minute guide for developers
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** — Complete project architecture
+- **[ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md)** — Visual diagrams
+
+### For AI Agents
+- **[.cursor/rules/project-architecture.md](./.cursor/rules/project-architecture.md)** — Quick reference
+- **[_bmad-output/project-context.md](./_bmad-output/project-context.md)** — Critical implementation rules
+
+### Infrastructure
+- **[docs/SUPABASE.md](./docs/SUPABASE.md)** — Supabase setup and database access
+
+## Tech Stack
+
+- React 19.2.4 + TypeScript 5.9.3 + Vite 8.0.1
+- Zustand 5.0.12 (state management)
+- Tailwind CSS 4.2.2 (styling)
+- Express 5.2.1 (font upload server)
+- html-to-image 1.11.13 (tile export)
+
+## Project Structure
+
+```
+src/
+├── components/     # React components (Grid, Tile, Toolbar, etc.)
+├── hooks/          # Custom hooks
+├── store/          # Zustand store (single source of truth)
+├── types/          # TypeScript types
+└── utils/          # Utilities (fonts, images, tileGenerator, etc.)
+```
+
+---
+
+## Original Vite Template Info
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
