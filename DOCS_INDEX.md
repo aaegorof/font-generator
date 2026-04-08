@@ -14,6 +14,8 @@ Complete guide to Font Generator project documentation.
 
 ### Infrastructure
 - **[docs/SUPABASE.md](./docs/SUPABASE.md)** — Supabase setup, database access, and troubleshooting
+- **[docs/GOOGLE_OAUTH_SETUP.md](./docs/GOOGLE_OAUTH_SETUP.md)** — Complete Google OAuth configuration guide
+- **[docs/GOOGLE_OAUTH_QUICKSTART.md](./docs/GOOGLE_OAUTH_QUICKSTART.md)** — Quick 5-minute OAuth setup
 
 ## For AI Agents
 
@@ -60,13 +62,17 @@ Complete guide to Font Generator project documentation.
 
 #### Database & Infrastructure
 - [docs/SUPABASE.md](./docs/SUPABASE.md) — Complete Supabase guide
+- [docs/GOOGLE_OAUTH_SETUP.md](./docs/GOOGLE_OAUTH_SETUP.md) — Google OAuth configuration
+- [docs/GOOGLE_OAUTH_QUICKSTART.md](./docs/GOOGLE_OAUTH_QUICKSTART.md) — Quick OAuth setup
 
 ## Reading Paths
 
 ### Path 1: "I'm new here"
 1. [README.md](./README.md) — What is this project?
 2. [QUICK_START.md](./QUICK_START.md) — How do I get started?
-3. [ARCHITECTURE.md](./ARCHITECTURE.md) — How does it work?
+3. [docs/SUPABASE.md](./docs/SUPABASE.md) — Set up local Supabase
+4. [docs/GOOGLE_OAUTH_QUICKSTART.md](./docs/GOOGLE_OAUTH_QUICKSTART.md) — Configure Google OAuth (5 min)
+5. [ARCHITECTURE.md](./ARCHITECTURE.md) — How does it work?
 
 ### Path 2: "I need to implement a feature"
 1. [QUICK_START.md](./QUICK_START.md) → "Common Tasks"

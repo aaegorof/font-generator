@@ -2,6 +2,8 @@
 
 This project uses Supabase for authentication, database, and storage. The setup uses Supabase CLI for local development with Docker.
 
+> **Google OAuth Setup**: For configuring Google authentication, see [GOOGLE_OAUTH_SETUP.md](./GOOGLE_OAUTH_SETUP.md)
+
 ## Prerequisites
 
 - Docker Desktop installed and running
