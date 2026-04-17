@@ -3,6 +3,7 @@ import { useStore } from '../../store/useStore'
 import { useFontFilter } from '../../hooks/useFontFilter'
 import { exportAllSettings, parseSettingsFile } from '../../utils/exportSettings'
 import './StatusBar.css'
+import { AuthButton } from '../Auth/AuthButton'
 
 export const StatusBar = memo(function StatusBar() {
   const {
@@ -92,11 +93,17 @@ export const StatusBar = memo(function StatusBar() {
       </div>
 
       <div className="status-bar__right">
-        <button className="status-bar__action-btn status-bar__action-btn--outline" onClick={randomize}>
+        <button
+          className="status-bar__action-btn status-bar__action-btn--outline"
+          onClick={randomize}
+        >
           <ShuffleIcon />
           <span>Randomize</span>
         </button>
-        <button className="status-bar__action-btn status-bar__action-btn--outline" onClick={handleReset}>
+        <button
+          className="status-bar__action-btn status-bar__action-btn--outline"
+          onClick={handleReset}
+        >
           <RefreshIcon />
           <span>Reset</span>
         </button>
@@ -108,7 +115,13 @@ export const StatusBar = memo(function StatusBar() {
         >
           <ExportIcon /> Export
         </button>
-        <input ref={importRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
+        <input
+          ref={importRef}
+          type="file"
+          accept=".json"
+          style={{ display: 'none' }}
+          onChange={handleImport}
+        />
         <button
           className="status-bar__action-btn status-bar__action-btn--outline"
           onClick={() => importRef.current?.click()}
@@ -116,6 +129,7 @@ export const StatusBar = memo(function StatusBar() {
         >
           <ImportIcon /> Import
         </button>
+        <AuthButton />
       </div>
     </div>
   )

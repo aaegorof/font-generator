@@ -5,15 +5,24 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently -n vite,server -c cyan,yellow \"vite\" \"node server.js\"",
+    "dev:full": "concurrently -n supabase,vite,server -c green,cyan,yellow \"supabase start\" \"vite\" \"node server.js\"",
+    "check": "bash scripts/check-dev-env.sh",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:status": "supabase status",
     "server": "node server.js",
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:types": "supabase gen types typescript --local > src/types/database.types.ts"
   },
   "dependencies": {
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/supabase-js": "^2.102.1",
     "express": "^5.2.1",
     "html-to-image": "^1.11.13",
     "multer": "^2.1.1",

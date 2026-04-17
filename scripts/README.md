@@ -9,22 +9,26 @@ Utility scripts for Font Generator project.
 Automated test script for Google OAuth configuration.
 
 **Usage**:
+
 ```bash
 ./scripts/test-google-oauth.sh
 ```
 
 **What it checks**:
+
 - ✅ Auth service health
 - ✅ Google OAuth provider status
 - ✅ Config.toml configuration
 - ✅ Environment variables
 
 **When to run**:
+
 - After configuring Google OAuth credentials
 - Before testing OAuth flow
 - When troubleshooting OAuth issues
 
 **Output**:
+
 - Color-coded results (green ✅, red ❌, yellow ⚠️)
 - Clear error messages with solutions
 - Next steps and verification commands

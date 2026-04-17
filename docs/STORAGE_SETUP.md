@@ -5,10 +5,12 @@ This document describes the storage bucket configuration for the Font Generator 
 ## Overview
 
 The application uses two Supabase Storage buckets:
+
 - **user-fonts**: For storing uploaded font files
 - **user-images**: For storing uploaded background images
 
 Both buckets are configured with:
+
 - Public read access (anyone can download)
 - Authenticated write access (only owners can upload/update/delete)
 - Row Level Security (RLS) policies for isolation
@@ -21,6 +23,7 @@ Both buckets are configured with:
 **Purpose**: Store user-uploaded font files
 
 **Settings**:
+
 - **Public**: Yes (read-only)
 - **File size limit**: 5 MB
 - **Allowed MIME types**:
@@ -40,6 +43,7 @@ Both buckets are configured with:
 **Purpose**: Store user-uploaded background images
 
 **Settings**:
+
 - **Public**: Yes (read-only)
 - **File size limit**: 10 MB
 - **Allowed MIME types**:
@@ -75,6 +79,7 @@ Both buckets are configured with:
 ### RLS Policies for user-images
 
 Same policy structure as user-fonts:
+
 1. **Users can upload own images** (INSERT)
 2. **Users can update own images** (UPDATE)
 3. **Users can delete own images** (DELETE)
@@ -87,6 +92,7 @@ Same policy structure as user-fonts:
 **API Base URL**: `http://127.0.0.1:54321/storage/v1`
 
 **Upload URL** (authenticated):
+
 ```
 POST http://127.0.0.1:54321/storage/v1/object/{bucket}/{path}
 Headers:
@@ -95,6 +101,7 @@ Headers:
 ```
 
 **Public Download URL**:
+
 ```
 GET http://127.0.0.1:54321/storage/v1/object/public/{bucket}/{path}
 ```
@@ -102,6 +109,7 @@ GET http://127.0.0.1:54321/storage/v1/object/public/{bucket}/{path}
 ### Examples
 
 **Upload font**:
+
 ```bash
 curl -X POST \
   "http://127.0.0.1:54321/storage/v1/object/user-fonts/${USER_ID}/my-font.woff2" \
@@ -111,12 +119,14 @@ curl -X POST \
 ```
 
 **Download font** (public):
+
 ```bash
 curl "http://127.0.0.1:54321/storage/v1/object/public/user-fonts/${USER_ID}/my-font.woff2" \
   -o downloaded-font.woff2
 ```
 
 **Upload image**:
+
 ```bash
 curl -X POST \
   "http://127.0.0.1:54321/storage/v1/object/user-images/${USER_ID}/bg.jpg" \
@@ -126,6 +136,7 @@ curl -X POST \
 ```
 
 **Download image** (public):
+
 ```bash
 curl "http://127.0.0.1:54321/storage/v1/object/public/user-images/${USER_ID}/bg.jpg" \
   -o downloaded-bg.jpg
@@ -136,11 +147,13 @@ curl "http://127.0.0.1:54321/storage/v1/object/public/user-images/${USER_ID}/bg.
 ### User Isolation
 
 RLS policies ensure users can only:
+
 - Upload files to their own folder (`{user_id}/`)
 - Update/delete their own files
 - Read anyone's files (public read)
 
 **Blocked actions**:
+
 - ❌ Upload to another user's folder
 - ❌ Delete another user's files
 - ❌ Update another user's files
@@ -148,10 +161,12 @@ RLS policies ensure users can only:
 ### File Validation
 
 **File size limits**:
+
 - Fonts: 5 MB maximum
 - Images: 10 MB maximum
 
 **MIME type validation**:
+
 - Only allowed file types can be uploaded
 - Prevents malicious file uploads
 
@@ -170,6 +185,7 @@ Use the test script to verify storage functionality:
 ```
 
 This script tests:
+
 - ✓ Bucket creation
 - ✓ File upload (own folder)
 - ✓ File download (public)
@@ -198,7 +214,8 @@ const path = `${otherUserId}/my-font.woff2`
 
 **Cause**: File is larger than the bucket's size limit
 
-**Solution**: 
+**Solution**:
+
 - Fonts: Keep files under 5 MB
 - Images: Keep files under 10 MB
 - Optimize/compress files before upload
@@ -208,6 +225,7 @@ const path = `${otherUserId}/my-font.woff2`
 **Cause**: File type is not in the allowed list
 
 **Solution**: Only upload allowed file types:
+
 - Fonts: `.woff2`, `.woff`, `.ttf`
 - Images: `.jpg`, `.jpeg`, `.png`, `.webp`
 
@@ -216,6 +234,7 @@ const path = `${otherUserId}/my-font.woff2`
 **Cause**: Storage buckets not created
 
 **Solution**: Run the migration:
+
 ```bash
 docker exec -i supabase_db_font-generator psql -U postgres -d postgres < supabase/migrations/00002_storage_policies.sql
 ```
@@ -230,6 +249,7 @@ docker exec -i supabase_db_font-generator psql -U postgres -d postgres -c \
 ```
 
 Expected output:
+
 ```
      id      |    name     | public | file_size_limit
 -------------+-------------+--------+-----------------
@@ -249,6 +269,7 @@ Expected output: 8 policies (4 per bucket)
 ## Migration
 
 The storage configuration is defined in:
+
 - `supabase/migrations/00002_storage_policies.sql`
 
 To apply the migration:

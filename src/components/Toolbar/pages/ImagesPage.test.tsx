@@ -46,10 +46,7 @@ describe('ImagesPage upload', () => {
     await waitFor(() => {
       expect(addImage).toHaveBeenCalledWith('/uploaded-images/test.png')
     })
-    expect(fetch).toHaveBeenCalledWith(
-      '/upload-image',
-      expect.objectContaining({ method: 'POST' }),
-    )
+    expect(fetch).toHaveBeenCalledWith('/upload-image', expect.objectContaining({ method: 'POST' }))
   })
 
   it('shows inline error on 409 and does not addImage', async () => {

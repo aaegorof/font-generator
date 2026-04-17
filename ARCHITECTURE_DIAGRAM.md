@@ -258,18 +258,23 @@ useStore Action
 ## Key Patterns
 
 ### 1. Single Source of Truth
+
 All state lives in one Zustand store. No prop drilling, no context.
 
 ### 2. Tile Generation
+
 Tiles are always generated, never manually created. This ensures consistency.
 
 ### 3. Font Injection
+
 Three different injection methods for three font sources, all managed in `utils/fonts.ts`.
 
 ### 4. Persistence
+
 Only essential data persists. Tiles are regenerated on load.
 
 ### 5. Named Exports
+
 All components use named exports for better tree-shaking and refactoring.
 
 ## Performance Considerations

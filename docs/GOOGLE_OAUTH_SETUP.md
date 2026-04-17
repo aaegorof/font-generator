@@ -11,6 +11,7 @@ Complete guide for configuring Google OAuth authentication with Supabase for the
 ## Overview
 
 This guide walks through:
+
 1. Creating a Google Cloud project
 2. Configuring OAuth consent screen
 3. Creating OAuth 2.0 credentials
@@ -203,8 +204,13 @@ curl http://127.0.0.1:54321/auth/v1/health
 ```
 
 Expected response:
+
 ```json
-{"version":"v2.188.1","name":"GoTrue","description":"GoTrue is a user registration and authentication API"}
+{
+  "version": "v2.188.1",
+  "name": "GoTrue",
+  "description": "GoTrue is a user registration and authentication API"
+}
 ```
 
 ### Test Authorization Endpoint
@@ -292,6 +298,7 @@ You should see your test user in the results.
 **Cause**: The redirect URI in your request doesn't match any authorized redirect URIs in Google Cloud Console.
 
 **Solution**:
+
 1. Go to Google Cloud Console → Credentials
 2. Edit your OAuth 2.0 Client ID
 3. Ensure `http://127.0.0.1:54321/auth/v1/callback` is in the "Authorized redirect URIs" list
@@ -302,6 +309,7 @@ You should see your test user in the results.
 **Cause**: Client ID or Client Secret is incorrect.
 
 **Solution**:
+
 1. Verify the values in your `.env` file match exactly what's in Google Cloud Console
 2. Make sure there are no extra spaces or quotes
 3. Restart Supabase after updating `.env`
@@ -311,6 +319,7 @@ You should see your test user in the results.
 **Cause**: OAuth consent screen is not configured properly.
 
 **Solution**:
+
 1. Complete the OAuth consent screen setup (Step 3)
 2. Add your test user email in the "Test users" section
 3. Ensure required scopes are added
@@ -326,6 +335,7 @@ You should see your test user in the results.
 **Cause**: Supabase was already running when you updated `.env`.
 
 **Solution**:
+
 ```bash
 npx supabase stop
 npx supabase start

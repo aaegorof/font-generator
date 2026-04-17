@@ -74,4 +74,3 @@ function ChevronIcon({ open }: { open: boolean }) {
     </svg>
   )
 }
-

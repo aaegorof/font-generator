@@ -16,6 +16,7 @@ status: 'draft'
 ## Problem Statement
 
 ### Current State
+
 - Все настройки хранятся в localStorage через Zustand persist
 - Нет авторизации и пользовательских аккаунтов
 - Загруженные файлы (шрифты, изображения) хранятся локально в `public/fonts/`
@@ -24,6 +25,7 @@ status: 'draft'
 - Нет централизованного управления данными
 
 ### Problems
+
 1. **Масштабируемость**: При росте функционала localStorage станет узким местом
 2. **Персонализация**: Нет возможности сохранять настройки для конкретного пользователя
 3. **Синхронизация**: Невозможно работать с разных устройств
@@ -33,6 +35,7 @@ status: 'draft'
 ## Goals & Success Metrics
 
 ### Primary Goals
+
 1. Развернуть self-hosted Supabase в Docker
 2. Настроить Google OAuth авторизацию
 3. Мигрировать все данные из localStorage в Supabase PostgreSQL
@@ -40,6 +43,7 @@ status: 'draft'
 5. Сохранить обратную совместимость (работа без авторизации через localStorage)
 
 ### Success Metrics
+
 - ✅ Supabase развернут и доступен локально
 - ✅ Google OAuth работает корректно
 - ✅ Все данные синхронизируются с БД
@@ -47,6 +51,7 @@ status: 'draft'
 - ✅ Приложение работает как с авторизацией, так и без нее
 
 ### Non-Goals (Future Backlog)
+
 - Offline режим (Service Worker + IndexedDB)
 - Realtime синхронизация между устройствами
 - Командная работа / шаринг настроек
@@ -55,11 +60,13 @@ status: 'draft'
 ## User Stories
 
 ### US-1: Авторизация через Google
+
 **As a** пользователь  
 **I want** войти в приложение через Google аккаунт  
 **So that** мои настройки сохранялись в облаке
 
 **Acceptance Criteria:**
+
 - Кнопка "Sign in with Google" в UI
 - После клика — редирект на Google OAuth
 - После успешной авторизации — возврат в приложение
@@ -69,11 +76,13 @@ status: 'draft'
 ---
 
 ### US-2: Автоматическая синхронизация настроек
+
 **As a** авторизованный пользователь  
 **I want** чтобы все мои изменения автоматически сохранялись  
 **So that** я не терял свою работу
 
 **Acceptance Criteria:**
+
 - При изменении настроек — автосохранение в Supabase (debounced 2 сек)
 - При логине — загрузка настроек из Supabase
 - При логауте — очистка store
@@ -82,11 +91,13 @@ status: 'draft'
 ---
 
 ### US-3: Загрузка шрифтов в Supabase Storage
+
 **As a** авторизованный пользователь  
 **I want** загружать шрифты в облако  
 **So that** они были доступны с любого устройства
 
 **Acceptance Criteria:**
+
 - Загрузка шрифтов через UI работает как раньше
 - Файлы сохраняются в Supabase Storage (`user-fonts/{user_id}/`)
 - Метаданные шрифта сохраняются в БД
@@ -96,11 +107,13 @@ status: 'draft'
 ---
 
 ### US-4: Загрузка изображений в Supabase Storage
+
 **As a** авторизованный пользователь  
 **I want** загружать изображения в облако  
 **So that** они были доступны с любого устройства
 
 **Acceptance Criteria:**
+
 - Загрузка изображений через UI работает как раньше
 - Файлы сохраняются в Supabase Storage (`user-images/{user_id}/`)
 - Метаданные изображения сохраняются в БД
@@ -110,11 +123,13 @@ status: 'draft'
 ---
 
 ### US-5: Работа без авторизации (Fallback)
+
 **As a** неавторизованный пользователь  
 **I want** продолжать работать с приложением как раньше  
 **So that** я мог попробовать функционал без регистрации
 
 **Acceptance Criteria:**
+
 - Приложение работает через localStorage как раньше
 - Все функции доступны
 - Кнопка "Sign in with Google" видна в UI
@@ -125,23 +140,26 @@ status: 'draft'
 ### Infrastructure
 
 #### Docker Compose Setup
+
 ```yaml
 services:
-  postgres:      # PostgreSQL 15
-  kong:          # API Gateway
-  auth:          # Supabase Auth
-  rest:          # PostgREST
-  storage:       # Supabase Storage
-  realtime:      # Supabase Realtime (опционально)
-  studio:        # Supabase Studio (UI для разработки)
+  postgres: # PostgreSQL 15
+  kong: # API Gateway
+  auth: # Supabase Auth
+  rest: # PostgREST
+  storage: # Supabase Storage
+  realtime: # Supabase Realtime (опционально)
+  studio: # Supabase Studio (UI для разработки)
 ```
 
 **Порты:**
+
 - `3000` — Supabase Studio
 - `8000` — Kong API Gateway
 - `5432` — PostgreSQL (внутренний)
 
 **Volumes:**
+
 - `supabase_db_data` — PostgreSQL данные
 - `supabase_storage_data` — Storage файлы
 
@@ -150,6 +168,7 @@ services:
 ### Database Schema
 
 #### Table: `user_profiles`
+
 ```sql
 CREATE TABLE user_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -179,6 +198,7 @@ CREATE POLICY "Users can insert own profile"
 ```
 
 #### Table: `user_fonts`
+
 ```sql
 CREATE TABLE user_fonts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -207,6 +227,7 @@ CREATE POLICY "Users can delete own fonts"
 ```
 
 #### Table: `user_images`
+
 ```sql
 CREATE TABLE user_images (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -235,6 +256,7 @@ CREATE POLICY "Users can delete own images"
 ```
 
 #### Table: `user_favorites`
+
 ```sql
 CREATE TABLE user_favorites (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -266,6 +288,7 @@ CREATE POLICY "Users can delete own favorites"
 ### Storage Buckets
 
 #### Bucket: `user-fonts`
+
 - **Path structure**: `{user_id}/{font_id}.{ext}`
 - **Allowed extensions**: `.woff2`, `.woff`, `.ttf`
 - **Max file size**: 5 MB
@@ -273,6 +296,7 @@ CREATE POLICY "Users can delete own favorites"
 - **RLS Policy**: Пользователи могут загружать/удалять только свои файлы
 
 #### Bucket: `user-images`
+
 - **Path structure**: `{user_id}/{image_id}.{ext}`
 - **Allowed extensions**: `.jpg`, `.jpeg`, `.png`, `.webp`
 - **Max file size**: 10 MB
@@ -284,6 +308,7 @@ CREATE POLICY "Users can delete own favorites"
 ### Frontend Architecture
 
 #### New Dependencies
+
 ```json
 {
   "@supabase/supabase-js": "^2.x",
@@ -293,6 +318,7 @@ CREATE POLICY "Users can delete own favorites"
 ```
 
 #### New Files Structure
+
 ```
 src/
 ├── lib/
@@ -309,6 +335,7 @@ src/
 ```
 
 #### Supabase Client (`src/lib/supabase.ts`)
+
 ```typescript
 import { createClient } from '@supabase/supabase-js'
 
@@ -319,6 +346,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 ```
 
 #### Auth Hook (`src/hooks/useAuth.ts`)
+
 ```typescript
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null)
@@ -333,6 +361,7 @@ export const useAuth = () => {
 ```
 
 #### Sync Hook (`src/hooks/useSupabaseSync.ts`)
+
 ```typescript
 export const useSupabaseSync = () => {
   // Subscribe to store changes
@@ -347,6 +376,7 @@ export const useSupabaseSync = () => {
 ### Environment Variables
 
 #### `.env.local`
+
 ```bash
 # Supabase
 VITE_SUPABASE_URL=http://localhost:8000
@@ -361,11 +391,13 @@ VITE_GOOGLE_CLIENT_ID=<google_client_id>
 ### Data Flow
 
 #### Without Authentication (Current)
+
 ```
 User Action → Zustand Store → localStorage (persist)
 ```
 
 #### With Authentication (New)
+
 ```
 User Action → Zustand Store → useSupabaseSync (debounced) → Supabase
                             ↓
@@ -373,11 +405,13 @@ User Action → Zustand Store → useSupabaseSync (debounced) → Supabase
 ```
 
 #### On Login
+
 ```
 Google OAuth → Supabase Auth → Load data from Supabase → Zustand Store
 ```
 
 #### On Logout
+
 ```
 Sign Out → Clear Zustand Store → Revert to localStorage
 ```
@@ -387,9 +421,11 @@ Sign Out → Clear Zustand Store → Revert to localStorage
 ## Implementation Plan (Epics)
 
 ### Epic 6: Supabase Infrastructure Setup ⭐ (Current)
+
 **Goal:** Развернуть и настроить Supabase локально
 
 **Stories:**
+
 1. **Story 6.1**: Setup Docker Compose для Supabase
    - Создать `docker-compose.yml`
    - Настроить volumes и networks
@@ -418,9 +454,11 @@ Sign Out → Clear Zustand Store → Revert to localStorage
 ---
 
 ### Epic 7: Authentication Integration
+
 **Goal:** Интегрировать авторизацию в приложение
 
 **Stories:**
+
 1. **Story 7.1**: Install Supabase Client
    - Установить зависимости
    - Создать `src/lib/supabase.ts`
@@ -444,9 +482,11 @@ Sign Out → Clear Zustand Store → Revert to localStorage
 ---
 
 ### Epic 8: Data Synchronization
+
 **Goal:** Синхронизировать Zustand store с Supabase
 
 **Stories:**
+
 1. **Story 8.1**: Create Sync Hook
    - Создать `useSupabaseSync` hook
    - Debounced save (2 sec)
@@ -475,9 +515,11 @@ Sign Out → Clear Zustand Store → Revert to localStorage
 ---
 
 ### Epic 9: File Storage Migration
+
 **Goal:** Мигрировать файлы в Supabase Storage
 
 **Stories:**
+
 1. **Story 9.1**: Font Upload to Storage
    - Обновить `FontsPage` для загрузки в Storage
    - Генерация публичного URL
@@ -501,16 +543,19 @@ Sign Out → Clear Zustand Store → Revert to localStorage
 ## Security & Privacy
 
 ### Row Level Security (RLS)
+
 - Все таблицы защищены RLS
 - Пользователи видят только свои данные
 - Политики проверяют `auth.uid() = user_id`
 
 ### Storage Security
+
 - Buckets защищены RLS
 - Пользователи могут загружать/удалять только свои файлы
 - Публичный доступ только для чтения
 
 ### Environment Variables
+
 - Все ключи в `.env.local` (не коммитить в git)
 - `.env.local` добавлен в `.gitignore`
 
@@ -519,16 +564,19 @@ Sign Out → Clear Zustand Store → Revert to localStorage
 ## Testing Strategy
 
 ### Unit Tests
+
 - Тесты для `useAuth` hook
 - Тесты для `useSupabaseSync` hook
 - Тесты для Supabase client functions
 
 ### Integration Tests
+
 - Тест авторизации через Google OAuth
 - Тест загрузки/сохранения данных
 - Тест загрузки файлов в Storage
 
 ### Manual Testing
+
 - Проверка работы без авторизации
 - Проверка работы с авторизацией
 - Проверка синхронизации между вкладками (future)
@@ -538,18 +586,22 @@ Sign Out → Clear Zustand Store → Revert to localStorage
 ## Risks & Mitigations
 
 ### Risk 1: Google OAuth Configuration
+
 **Risk:** Сложности с настройкой OAuth  
 **Mitigation:** Использовать официальную документацию Supabase, тестировать на локальном окружении
 
 ### Risk 2: Data Migration
+
 **Risk:** Потеря данных при миграции  
 **Mitigation:** Нет пользователей, нечего терять. В будущем — функция импорта из localStorage
 
 ### Risk 3: Performance
+
 **Risk:** Медленная синхронизация с Supabase  
 **Mitigation:** Debounced save (2 sec), оптимизация запросов, индексы в БД
 
 ### Risk 4: Docker Setup Complexity
+
 **Risk:** Сложности с настройкой Docker Compose  
 **Mitigation:** Использовать официальный Supabase Docker setup, документация
 
@@ -558,19 +610,23 @@ Sign Out → Clear Zustand Store → Revert to localStorage
 ## Future Enhancements (Backlog)
 
 ### Offline Mode
+
 - Service Worker для кэширования
 - IndexedDB для локального хранилища
 - Синхронизация при восстановлении соединения
 
 ### Realtime Sync
+
 - Использовать Supabase Realtime
 - Синхронизация между вкладками/устройствами в реальном времени
 
 ### Team Collaboration
+
 - Шаринг настроек между пользователями
 - Командные проекты
 
 ### Migration Tool
+
 - Импорт данных из localStorage при первом логине
 - UI для миграции
 
@@ -579,12 +635,14 @@ Sign Out → Clear Zustand Store → Revert to localStorage
 ## Appendix
 
 ### References
+
 - [Supabase Documentation](https://supabase.com/docs)
 - [Supabase Self-Hosting](https://supabase.com/docs/guides/self-hosting)
 - [Google OAuth Setup](https://supabase.com/docs/guides/auth/social-login/auth-google)
 - [Supabase Storage](https://supabase.com/docs/guides/storage)
 
 ### Related Documents
+
 - `ARCHITECTURE.md` — Текущая архитектура проекта
 - `src/store/useStore.ts` — Zustand store
 - `server.js` — Express сервер для загрузки файлов

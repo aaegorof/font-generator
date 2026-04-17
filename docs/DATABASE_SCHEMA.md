@@ -14,16 +14,16 @@ Stores user profile settings and preferences. One row per user.
 
 **Columns:**
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID | Primary key, references `auth.users(id)` |
-| `settings` | JSONB | UI settings (columns, padding, overlayOpacity, grayscale) |
-| `text_inputs` | JSONB | Array of text input configurations |
-| `toolbar_open` | BOOLEAN | Whether toolbar is open/closed |
-| `layer_font_pins` | JSONB | Pinned fonts for specific layers (Record<number, string>) |
-| `disabled_images` | JSONB | Array of disabled image URLs |
-| `created_at` | TIMESTAMPTZ | Creation timestamp |
-| `updated_at` | TIMESTAMPTZ | Last update timestamp (auto-updated) |
+| Column            | Type        | Description                                               |
+| ----------------- | ----------- | --------------------------------------------------------- |
+| `id`              | UUID        | Primary key, references `auth.users(id)`                  |
+| `settings`        | JSONB       | UI settings (columns, padding, overlayOpacity, grayscale) |
+| `text_inputs`     | JSONB       | Array of text input configurations                        |
+| `toolbar_open`    | BOOLEAN     | Whether toolbar is open/closed                            |
+| `layer_font_pins` | JSONB       | Pinned fonts for specific layers (Record<number, string>) |
+| `disabled_images` | JSONB       | Array of disabled image URLs                              |
+| `created_at`      | TIMESTAMPTZ | Creation timestamp                                        |
+| `updated_at`      | TIMESTAMPTZ | Last update timestamp (auto-updated)                      |
 
 **Default Values:**
 
@@ -35,18 +35,20 @@ Stores user profile settings and preferences. One row per user.
     "overlayOpacity": 0.25,
     "grayscale": false
   },
-  "text_inputs": [{
-    "id": "input-default-1",
-    "text": "de Tribe",
-    "fontSize": 56,
-    "letterSpacing": 0.02,
-    "lineHeight": 1.0,
-    "textColor": "#ffffff",
-    "textShadow": true,
-    "textWrap": true,
-    "alignment": "center",
-    "verticalAlignment": "center"
-  }],
+  "text_inputs": [
+    {
+      "id": "input-default-1",
+      "text": "de Tribe",
+      "fontSize": 56,
+      "letterSpacing": 0.02,
+      "lineHeight": 1.0,
+      "textColor": "#ffffff",
+      "textShadow": true,
+      "textWrap": true,
+      "alignment": "center",
+      "verticalAlignment": "center"
+    }
+  ],
   "toolbar_open": true,
   "layer_font_pins": {},
   "disabled_images": []
@@ -83,19 +85,21 @@ Stores user font definitions (Google Fonts, local fonts, uploaded fonts).
 
 **Columns:**
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID | Primary key (auto-generated) |
-| `user_id` | UUID | References `auth.users(id)` |
-| `font_def` | JSONB | FontDef object (see below) |
-| `storage_path` | TEXT | Path in Supabase Storage (for uploaded fonts only) |
-| `created_at` | TIMESTAMPTZ | Creation timestamp |
+| Column         | Type        | Description                                        |
+| -------------- | ----------- | -------------------------------------------------- |
+| `id`           | UUID        | Primary key (auto-generated)                       |
+| `user_id`      | UUID        | References `auth.users(id)`                        |
+| `font_def`     | JSONB       | FontDef object (see below)                         |
+| `storage_path` | TEXT        | Path in Supabase Storage (for uploaded fonts only) |
+| `created_at`   | TIMESTAMPTZ | Creation timestamp                                 |
 
 **Indexes:**
+
 - `idx_user_fonts_user_id` on `user_id`
 - `idx_user_fonts_created_at` on `created_at DESC`
 
 **Constraints:**
+
 - `font_def` must contain `id`, `name`, and `source` fields
 
 **TypeScript Interface:**
@@ -120,19 +124,21 @@ Stores user uploaded images.
 
 **Columns:**
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID | Primary key (auto-generated) |
-| `user_id` | UUID | References `auth.users(id)` |
-| `storage_path` | TEXT | Path in Supabase Storage bucket |
-| `url` | TEXT | Public URL for the image |
-| `created_at` | TIMESTAMPTZ | Creation timestamp |
+| Column         | Type        | Description                     |
+| -------------- | ----------- | ------------------------------- |
+| `id`           | UUID        | Primary key (auto-generated)    |
+| `user_id`      | UUID        | References `auth.users(id)`     |
+| `storage_path` | TEXT        | Path in Supabase Storage bucket |
+| `url`          | TEXT        | Public URL for the image        |
+| `created_at`   | TIMESTAMPTZ | Creation timestamp              |
 
 **Indexes:**
+
 - `idx_user_images_user_id` on `user_id`
 - `idx_user_images_created_at` on `created_at DESC`
 
 **Constraints:**
+
 - `storage_path` cannot be empty
 - `url` cannot be empty
 
@@ -142,18 +148,20 @@ Stores user favorite tiles (saved combinations of images, fonts, and settings).
 
 **Columns:**
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID | Primary key (auto-generated) |
-| `user_id` | UUID | References `auth.users(id)` |
-| `favorite_data` | JSONB | FavoriteItem object (see below) |
-| `created_at` | TIMESTAMPTZ | Creation timestamp |
+| Column          | Type        | Description                     |
+| --------------- | ----------- | ------------------------------- |
+| `id`            | UUID        | Primary key (auto-generated)    |
+| `user_id`       | UUID        | References `auth.users(id)`     |
+| `favorite_data` | JSONB       | FavoriteItem object (see below) |
+| `created_at`    | TIMESTAMPTZ | Creation timestamp              |
 
 **Indexes:**
+
 - `idx_user_favorites_user_id` on `user_id`
 - `idx_user_favorites_created_at` on `created_at DESC`
 
 **Constraints:**
+
 - `favorite_data` must contain `tile` and `settings` fields
 
 **TypeScript Interface:**
@@ -183,22 +191,26 @@ All tables have RLS enabled with policies that ensure users can only access thei
 Each table has 4 policies (SELECT, INSERT, UPDATE, DELETE):
 
 **SELECT Policy:**
+
 ```sql
 USING (auth.uid() = user_id)  -- or id for user_profiles
 ```
 
 **INSERT Policy:**
+
 ```sql
 WITH CHECK (auth.uid() = user_id)  -- or id for user_profiles
 ```
 
 **UPDATE Policy:**
+
 ```sql
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id)
 ```
 
 **DELETE Policy:**
+
 ```sql
 USING (auth.uid() = user_id)
 ```
@@ -206,6 +218,7 @@ USING (auth.uid() = user_id)
 ### Testing RLS
 
 RLS policies have been tested and verified to:
+
 - ✅ Allow users to view their own data
 - ✅ Block users from viewing other users' data
 - ✅ Allow users to insert their own data
@@ -252,29 +265,23 @@ All foreign keys use `ON DELETE CASCADE` to automatically clean up related data 
 ### Query User Profile
 
 ```typescript
-const { data, error } = await supabase
-  .from('user_profiles')
-  .select('*')
-  .eq('id', userId)
-  .single()
+const { data, error } = await supabase.from('user_profiles').select('*').eq('id', userId).single()
 ```
 
 ### Insert Font
 
 ```typescript
-const { data, error } = await supabase
-  .from('user_fonts')
-  .insert({
-    user_id: userId,
-    font_def: {
-      id: 'roboto',
-      name: 'Roboto',
-      family: 'Roboto',
-      weight: 400,
-      source: 'google',
-      isActive: true
-    }
-  })
+const { data, error } = await supabase.from('user_fonts').insert({
+  user_id: userId,
+  font_def: {
+    id: 'roboto',
+    name: 'Roboto',
+    family: 'Roboto',
+    weight: 400,
+    source: 'google',
+    isActive: true,
+  },
+})
 ```
 
 ### Query User Fonts
@@ -297,8 +304,8 @@ const { data, error } = await supabase
       columns: 6,
       padding: 32,
       overlayOpacity: 0.5,
-      grayscale: false
-    }
+      grayscale: false,
+    },
   })
   .eq('id', userId)
 ```
@@ -306,11 +313,7 @@ const { data, error } = await supabase
 ### Delete Font
 
 ```typescript
-const { error } = await supabase
-  .from('user_fonts')
-  .delete()
-  .eq('id', fontId)
-  .eq('user_id', userId)  // RLS ensures this is enforced
+const { error } = await supabase.from('user_fonts').delete().eq('id', fontId).eq('user_id', userId) // RLS ensures this is enforced
 ```
 
 ## Performance Considerations
@@ -318,11 +321,13 @@ const { error } = await supabase
 ### Indexes
 
 All tables with `user_id` have indexes for fast lookups:
+
 - `idx_user_fonts_user_id`
 - `idx_user_images_user_id`
 - `idx_user_favorites_user_id`
 
 All tables have indexes on `created_at DESC` for efficient sorting:
+
 - `idx_user_fonts_created_at`
 - `idx_user_images_created_at`
 - `idx_user_favorites_created_at`
@@ -333,7 +338,7 @@ JSONB columns are used for flexible schema design. For better query performance 
 
 ```sql
 -- Example: Index for searching font names
-CREATE INDEX idx_user_fonts_font_def_name 
+CREATE INDEX idx_user_fonts_font_def_name
 ON public.user_fonts USING GIN ((font_def->'name'));
 ```
 
@@ -356,8 +361,8 @@ ON public.user_fonts USING GIN ((font_def->'name'));
 
 ## Migration History
 
-| Migration | Description | Date |
-|-----------|-------------|------|
+| Migration                  | Description                               | Date       |
+| -------------------------- | ----------------------------------------- | ---------- |
 | `00001_initial_schema.sql` | Initial schema with tables, RLS, triggers | 2026-04-08 |
 
 ## Testing

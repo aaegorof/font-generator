@@ -167,10 +167,14 @@ export const useStore = create<AppStore>()(
         },
         toggleFontActive: (id) => {
           set((state) => {
-            const fonts = state.fonts.map((f) => (f.id === id ? { ...f, isActive: !f.isActive } : f))
+            const fonts = state.fonts.map((f) =>
+              f.id === id ? { ...f, isActive: !f.isActive } : f,
+            )
             const isCurrentlyActive = state.fonts.find((f) => f.id === id)?.isActive !== false
             const layerFontPins = isCurrentlyActive
-              ? Object.fromEntries(Object.entries(state.layerFontPins).filter(([, fId]) => fId !== id))
+              ? Object.fromEntries(
+                  Object.entries(state.layerFontPins).filter(([, fId]) => fId !== id),
+                )
               : state.layerFontPins
             return { fonts, layerFontPins }
           })
@@ -233,7 +237,9 @@ export const useStore = create<AppStore>()(
         },
         randomize: () => {
           const { fonts, textInputs, layerFontPins } = get()
-          set({ tiles: randomizeTiles(fonts, activeImages(), textInputs.length, 60, layerFontPins) })
+          set({
+            tiles: randomizeTiles(fonts, activeImages(), textInputs.length, 60, layerFontPins),
+          })
         },
         randomizeSingleTile: (tileId) => {
           const { fonts, textInputs, layerFontPins } = get()

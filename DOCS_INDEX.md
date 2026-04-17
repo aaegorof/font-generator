@@ -5,14 +5,19 @@ Complete guide to Font Generator project documentation.
 ## For Developers
 
 ### Getting Started
+
 - **[QUICK_START.md](./QUICK_START.md)** — 5-minute overview, common tasks, troubleshooting
 - **[README.md](./README.md)** — Project overview and quick commands
+- **[docs/LOCAL_DEVELOPMENT.md](./docs/LOCAL_DEVELOPMENT.md)** — Local dev setup with Supabase (one command!)
 
 ### Architecture Documentation
+
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** — Complete project architecture, components, and patterns
 - **[ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md)** — Visual diagrams of data flow and component hierarchy
 
 ### Infrastructure
+
+- **[docs/LOCAL_DEVELOPMENT.md](./docs/LOCAL_DEVELOPMENT.md)** — Local dev environment setup (Supabase + Frontend + Backend)
 - **[docs/SUPABASE.md](./docs/SUPABASE.md)** — Supabase setup, database access, and troubleshooting
 - **[docs/STORAGE_SETUP.md](./docs/STORAGE_SETUP.md)** — Storage buckets, RLS policies, and file upload
 - **[docs/GOOGLE_OAUTH_SETUP.md](./docs/GOOGLE_OAUTH_SETUP.md)** — Complete Google OAuth configuration guide
@@ -21,47 +26,56 @@ Complete guide to Font Generator project documentation.
 ## For AI Agents
 
 ### Implementation Rules
+
 - **[.cursor/rules/project-architecture.md](./.cursor/rules/project-architecture.md)** — Quick reference for AI agents
-- **[_bmad-output/project-context.md](./_bmad-output/project-context.md)** — Critical rules (tech stack, TypeScript, React, Zustand)
+- **[\_bmad-output/project-context.md](./_bmad-output/project-context.md)** — Critical rules (tech stack, TypeScript, React, Zustand)
 - **[.cursor/rules/README.md](./.cursor/rules/README.md)** — Overview of available rules
 
 ## By Topic
 
 ### Getting Started
+
 1. [QUICK_START.md](./QUICK_START.md) — Installation, dev setup, first steps
 2. [README.md](./README.md) — Project overview and quick commands
 3. [docs/SUPABASE.md](./docs/SUPABASE.md) — Supabase local development setup
 
 ### Understanding the Codebase
+
 1. [ARCHITECTURE.md](./ARCHITECTURE.md) — Full architecture documentation
 2. [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) — Visual diagrams
-3. [_bmad-output/project-context.md](./_bmad-output/project-context.md) — Implementation rules
+3. [\_bmad-output/project-context.md](./_bmad-output/project-context.md) — Implementation rules
 
 ### Working with Specific Features
 
 #### State Management
+
 - [ARCHITECTURE.md](./ARCHITECTURE.md) → "Управление состоянием (Zustand Store)"
 - [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) → "Zustand Store diagram"
 
 #### Fonts
+
 - [ARCHITECTURE.md](./ARCHITECTURE.md) → "Работа со шрифтами"
 - [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) → "Font Injection Flow"
-- [_bmad-output/project-context.md](./_bmad-output/project-context.md) → "Font Pipeline Rules"
+- [\_bmad-output/project-context.md](./_bmad-output/project-context.md) → "Font Pipeline Rules"
 - [public/fonts/README.md](./public/fonts/README.md) → "Custom fonts setup"
 
 #### Components
+
 - [ARCHITECTURE.md](./ARCHITECTURE.md) → "Основные компоненты"
 - [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) → "Component Hierarchy"
 
 #### Tile Generation
+
 - [ARCHITECTURE.md](./ARCHITECTURE.md) → "Генерация тайлов"
 - [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) → "Data Flow: Adding a Font"
 
 #### Export
+
 - [ARCHITECTURE.md](./ARCHITECTURE.md) → "Экспорт тайлов"
 - [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) → "Data Flow: Exporting a Tile"
 
 #### Database & Infrastructure
+
 - [docs/SUPABASE.md](./docs/SUPABASE.md) — Complete Supabase guide
 - [docs/STORAGE_SETUP.md](./docs/STORAGE_SETUP.md) — Storage buckets and file upload
 - [docs/GOOGLE_OAUTH_SETUP.md](./docs/GOOGLE_OAUTH_SETUP.md) — Google OAuth configuration
@@ -70,32 +84,37 @@ Complete guide to Font Generator project documentation.
 ## Reading Paths
 
 ### Path 1: "I'm new here"
+
 1. [README.md](./README.md) — What is this project?
-2. [QUICK_START.md](./QUICK_START.md) — How do I get started?
-3. [docs/SUPABASE.md](./docs/SUPABASE.md) — Set up local Supabase
+2. [docs/LOCAL_DEVELOPMENT.md](./docs/LOCAL_DEVELOPMENT.md) — Set up local environment (one command!)
+3. [QUICK_START.md](./QUICK_START.md) — How do I get started?
 4. [docs/GOOGLE_OAUTH_QUICKSTART.md](./docs/GOOGLE_OAUTH_QUICKSTART.md) — Configure Google OAuth (5 min)
 5. [ARCHITECTURE.md](./ARCHITECTURE.md) — How does it work?
 
 ### Path 2: "I need to implement a feature"
+
 1. [QUICK_START.md](./QUICK_START.md) → "Common Tasks"
 2. [ARCHITECTURE.md](./ARCHITECTURE.md) → Find relevant component/pattern
-3. [_bmad-output/project-context.md](./_bmad-output/project-context.md) → Check implementation rules
+3. [\_bmad-output/project-context.md](./_bmad-output/project-context.md) → Check implementation rules
 4. Look at existing code for similar features
 
 ### Path 3: "I'm an AI agent"
+
 1. [.cursor/rules/project-architecture.md](./.cursor/rules/project-architecture.md) — Quick reference
 2. [QUICK_START.md](./QUICK_START.md) — Overview and common tasks
 3. [ARCHITECTURE.md](./ARCHITECTURE.md) — Detailed architecture
-4. [_bmad-output/project-context.md](./_bmad-output/project-context.md) — Critical rules
+4. [\_bmad-output/project-context.md](./_bmad-output/project-context.md) — Critical rules
 
 ### Path 4: "I need to understand data flow"
+
 1. [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) — All visual diagrams
 2. [ARCHITECTURE.md](./ARCHITECTURE.md) → "Управление состоянием"
 
 ### Path 5: "I'm debugging an issue"
+
 1. [QUICK_START.md](./QUICK_START.md) → "Troubleshooting"
 2. [ARCHITECTURE.md](./ARCHITECTURE.md) → Find relevant section
-3. [_bmad-output/project-context.md](./_bmad-output/project-context.md) → "Critical Don't-Miss Rules"
+3. [\_bmad-output/project-context.md](./_bmad-output/project-context.md) → "Critical Don't-Miss Rules"
 
 ## File Structure
 
@@ -108,6 +127,7 @@ Complete guide to Font Generator project documentation.
 ├── ARCHITECTURE_DIAGRAM.md            # Visual diagrams
 │
 ├── docs/
+│   ├── LOCAL_DEVELOPMENT.md           # Local dev setup (one command!)
 │   ├── SUPABASE.md                    # Supabase setup and database guide
 │   ├── STORAGE_SETUP.md               # Storage buckets and file upload
 │   ├── GOOGLE_OAUTH_SETUP.md          # Google OAuth configuration
@@ -154,4 +174,4 @@ Complete guide to Font Generator project documentation.
 
 ---
 
-**Last Updated**: 2026-04-08
+**Last Updated**: 2026-04-16

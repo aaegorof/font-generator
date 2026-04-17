@@ -19,6 +19,7 @@ supabase start
 ```
 
 This command will:
+
 - Pull all necessary Docker images (first time only)
 - Start all Supabase services locally
 - Display connection information and API keys
@@ -29,13 +30,10 @@ After starting, you can access:
 
 - **Supabase Studio**: http://127.0.0.1:54323
   - Web UI for managing your database, auth, and storage
-  
 - **REST API**: http://127.0.0.1:54321/rest/v1
   - Auto-generated REST API from your database schema
-  
 - **GraphQL API**: http://127.0.0.1:54321/graphql/v1
   - Auto-generated GraphQL API
-  
 - **Mailpit (Email Testing)**: http://127.0.0.1:54324
   - View emails sent during development
 
@@ -52,6 +50,7 @@ docker exec supabase_db_font-generator psql -U postgres -d postgres -f /tmp/0000
 ```
 
 Or use Supabase Studio:
+
 1. Open http://127.0.0.1:54323
 2. Go to SQL Editor
 3. Copy contents of `supabase/migrations/00001_initial_schema.sql`
@@ -74,6 +73,7 @@ See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for complete schema documentation
 Open in browser: **http://127.0.0.1:54323**
 
 This is the easiest way to:
+
 - Browse and edit tables
 - Run SQL queries
 - Manage users and authentication
@@ -104,11 +104,13 @@ We provide convenient scripts for database access:
 #### Option 3: Direct psql Connection
 
 If you have PostgreSQL client installed:
+
 ```bash
 psql postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
 
 Install PostgreSQL client:
+
 ```bash
 # macOS
 brew install postgresql
@@ -120,6 +122,7 @@ sudo apt-get install postgresql-client
 #### Option 4: Docker Exec
 
 Access database through Docker container:
+
 ```bash
 docker exec -i supabase_db_font-generator psql -U postgres
 ```
@@ -140,6 +143,7 @@ supabase stop
 ```
 
 To stop and remove all data:
+
 ```bash
 supabase stop --no-backup
 ```
@@ -155,6 +159,7 @@ cp .env.example .env
 ```
 
 The default local development values are:
+
 - **API URL**: http://127.0.0.1:54321
 - **Anon Key**: `<local-anon-key-from-supabase-status>`
 - **Service Role Key**: `<local-service-role-from-supabase-status>`
@@ -242,20 +247,20 @@ Generates TypeScript types from your database schema.
 
 The following containers are created:
 
-| Service | Container Name | Port | Description |
-|---------|---------------|------|-------------|
-| Studio | `supabase_studio_font-generator` | 54323 | Web UI |
-| Kong | `supabase_kong_font-generator` | 54321 | API Gateway |
-| Auth | `supabase_auth_font-generator` | - | Authentication service |
-| REST | `supabase_rest_font-generator` | - | PostgREST API |
-| Realtime | `supabase_realtime_font-generator` | - | Realtime subscriptions |
-| Storage | `supabase_storage_font-generator` | - | File storage |
-| Database | `supabase_db_font-generator` | 54322 | PostgreSQL 17 |
-| Mailpit | `supabase_inbucket_font-generator` | 54324 | Email testing |
-| Meta | `supabase_pg_meta_font-generator` | - | Database metadata |
-| Vector | `supabase_vector_font-generator` | - | Vector embeddings |
-| Analytics | `supabase_analytics_font-generator` | 54327 | Analytics |
-| Edge Runtime | `supabase_edge_runtime_font-generator` | - | Edge functions |
+| Service      | Container Name                         | Port  | Description            |
+| ------------ | -------------------------------------- | ----- | ---------------------- |
+| Studio       | `supabase_studio_font-generator`       | 54323 | Web UI                 |
+| Kong         | `supabase_kong_font-generator`         | 54321 | API Gateway            |
+| Auth         | `supabase_auth_font-generator`         | -     | Authentication service |
+| REST         | `supabase_rest_font-generator`         | -     | PostgREST API          |
+| Realtime     | `supabase_realtime_font-generator`     | -     | Realtime subscriptions |
+| Storage      | `supabase_storage_font-generator`      | -     | File storage           |
+| Database     | `supabase_db_font-generator`           | 54322 | PostgreSQL 17          |
+| Mailpit      | `supabase_inbucket_font-generator`     | 54324 | Email testing          |
+| Meta         | `supabase_pg_meta_font-generator`      | -     | Database metadata      |
+| Vector       | `supabase_vector_font-generator`       | -     | Vector embeddings      |
+| Analytics    | `supabase_analytics_font-generator`    | 54327 | Analytics              |
+| Edge Runtime | `supabase_edge_runtime_font-generator` | -     | Edge functions         |
 
 ## Project Structure
 
@@ -305,21 +310,25 @@ supabase start
 ### Database Connection Issues
 
 Ensure Docker is running and has enough resources:
+
 - Minimum 4GB RAM
 - At least 10GB disk space
 
 ### Common Errors
 
 **Error: "Cannot connect to Docker daemon"**
+
 - Make sure Docker Desktop is running
 - Try restarting Docker Desktop
 
 **Error: "Port already in use"**
+
 - Check if another Supabase instance is running
 - Check if other services are using ports 54321-54327
 - Change ports in `supabase/config.toml`
 
 **Error: "Database migration failed"**
+
 - Check migration files in `supabase/migrations/`
 - Run `supabase db reset` to start fresh
 - Check logs with `supabase logs`
@@ -334,6 +343,7 @@ Storage buckets are configured for user-uploaded fonts and images.
 - **user-images**: Background image storage (10 MB limit, .jpg/.png/.webp)
 
 Both buckets have:
+
 - Public read access (anyone can download)
 - RLS-protected write access (users can only upload to their own folder)
 - File size limits and MIME type validation

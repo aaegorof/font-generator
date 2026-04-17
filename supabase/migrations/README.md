@@ -41,24 +41,24 @@ After applying a migration, verify the schema:
 
 ```sql
 -- Check all tables exist
-SELECT table_name 
-FROM information_schema.tables 
-WHERE table_schema = 'public' 
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
   AND table_name IN ('user_profiles', 'user_fonts', 'user_images', 'user_favorites');
 
 -- Check RLS enabled
-SELECT tablename, rowsecurity 
-FROM pg_tables 
+SELECT tablename, rowsecurity
+FROM pg_tables
 WHERE schemaname = 'public';
 
 -- Check all policies exist (should be 16 total: 4 tables × 4 operations)
 SELECT COUNT(*) as policy_count
-FROM pg_policies 
+FROM pg_policies
 WHERE schemaname = 'public';
 
 -- List all policies
-SELECT tablename, policyname, cmd 
-FROM pg_policies 
+SELECT tablename, policyname, cmd
+FROM pg_policies
 WHERE schemaname = 'public'
 ORDER BY tablename, cmd;
 ```
@@ -75,6 +75,7 @@ ORDER BY tablename, cmd;
 ### Security
 
 All tables have Row Level Security (RLS) enabled with policies that:
+
 - Allow users to view only their own data
 - Allow users to insert only their own data
 - Allow users to update only their own data
@@ -88,6 +89,7 @@ All tables have Row Level Security (RLS) enabled with policies that:
 ## Migration Naming Convention
 
 Migrations are numbered sequentially with 5 digits:
+
 - `00001_initial_schema.sql`
 - `00002_add_feature_x.sql`
 - `00003_modify_table_y.sql`

@@ -122,7 +122,7 @@ export function ImagesPage() {
           return (
             <div
               key={idx}
-              className={`toolbar__image-thumb${isDisabled ? ' toolbar__image-thumb--disabled' : ''}`}
+              className={`toolbar__image-thumb${isDisabled ? 'toolbar__image-thumb--disabled' : ''}`}
             >
               <img src={img} alt="" loading="lazy" />
               <div className="toolbar__image-actions">

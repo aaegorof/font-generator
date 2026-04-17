@@ -6,7 +6,6 @@ export const DEFAULT_IMAGES: string[] = [
   'https://picsum.photos/seed/desert/800/600',
   'https://picsum.photos/seed/city/800/600',
   'https://picsum.photos/seed/river/800/600',
-
 ]
 
 export const LOCAL_IMAGE_PREFIX = '/images/'

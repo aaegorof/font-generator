@@ -31,10 +31,7 @@ export function useFontFilter() {
   const clearFilter = useCallback(() => {
     const params = new URLSearchParams(searchParams)
     params.delete('fontFilter')
-    navigate(
-      { pathname: location.pathname, search: params.toString() },
-      { replace: true },
-    )
+    navigate({ pathname: location.pathname, search: params.toString() }, { replace: true })
   }, [searchParams, navigate, location.pathname])
 
   return { filter, setFilter, clearFilter }

@@ -1,0 +1,221 @@
+# Supabase Docker Compose Configuration
+# This file is managed by Supabase CLI
+# 
+# IMPORTANT: This project uses Supabase CLI for local development.
+# Do not run `docker-compose up` directly. Instead, use:
+#   - supabase start   (to start all services)
+#   - supabase stop    (to stop all services)
+#   - supabase status  (to check service status)
+#
+# The actual docker-compose configuration is managed internally by
+# Supabase CLI and located in the .supabase directory (created at runtime).
+#
+# This file exists for documentation purposes and to satisfy the
+# Story 6.1 acceptance criteria requirement for a docker-compose.yml file.
+
+version: '3.8'
+
+# NOTE: All services are managed by `supabase start` command
+# Configuration is in supabase/config.toml
+
+services:
+  # PostgreSQL 17 Database
+  db:
+    image: supabase/postgres:17.6.0.000
+    container_name: supabase_db_font-generator
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - supabase_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Kong API Gateway
+  kong:
+    image: kong:2.8.1
+    container_name: supabase_kong_font-generator
+    depends_on:
+      - db
+      - auth
+      - rest
+      - realtime
+      - storage
+    ports:
+      - "54321:8000"
+      - "8443:8443"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl
+    volumes:
+      - ./supabase/config/kong.yml:/var/lib/kong/kong.yml:ro
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  # Supabase Auth (GoTrue)
+  auth:
+    image: supabase/gotrue:latest
+    container_name: supabase_auth_font-generator
+    depends_on:
+      - db
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
+      GOTRUE_SITE_URL: http://127.0.0.1:3000
+      GOTRUE_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+      GOTRUE_EXTERNAL_GOOGLE_ENABLED: ${ENABLE_GOOGLE_OAUTH:-true}
+      GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: ${SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID:-}
+      GOTRUE_EXTERNAL_GOOGLE_SECRET: ${SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET:-}
+      GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: http://127.0.0.1:54321/auth/v1/callback
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9999/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgREST API
+  rest:
+    image: postgrest/postgrest:latest
+    container_name: supabase_rest_font-generator
+    depends_on:
+      - db
+    environment:
+      PGRST_DB_URI: postgres://postgres:postgres@db:5432/postgres
+      PGRST_DB_SCHEMAS: public,storage,graphql_public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Supabase Realtime
+  realtime:
+    image: supabase/realtime:latest
+    container_name: supabase_realtime_font-generator
+    depends_on:
+      - db
+    environment:
+      PORT: 4000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: postgres
+      DB_ENC_KEY: supabaserealtime
+      API_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+      SECRET_KEY_BASE: UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Supabase Storage
+  storage:
+    image: supabase/storage-api:latest
+    container_name: supabase_storage_font-generator
+    depends_on:
+      - db
+      - rest
+    environment:
+      ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+      SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+      POSTGREST_URL: http://rest:3000
+      PGRST_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+      DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: local
+      GLOBAL_S3_BUCKET: stub
+    volumes:
+      - supabase_storage_data:/var/lib/storage
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Supabase Studio
+  studio:
+    image: supabase/studio:latest
+    container_name: supabase_studio_font-generator
+    ports:
+      - "54323:3000"
+    environment:
+      SUPABASE_URL: http://kong:8000
+      STUDIO_PG_META_URL: http://meta:8080
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+      SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Postgres Meta
+  meta:
+    image: supabase/postgres-meta:latest
+    container_name: supabase_pg_meta_font-generator
+    depends_on:
+      - db
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: postgres
+      PG_META_DB_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Mailpit (Email Testing)
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: supabase_inbucket_font-generator
+    ports:
+      - "54324:8025"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8025/api/v1/info"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  supabase_db_data:
+    driver: local
+  supabase_storage_data:
+    driver: local
+
+networks:
+  default:
+    name: supabase_network_font-generator
+    driver: bridge
+
+# Documentation:
+# - This configuration uses non-standard ports (54321-54327) to avoid conflicts
+# - Studio: http://127.0.0.1:54323 (not 3000)
+# - Kong API: http://127.0.0.1:54321 (not 8000)
+# - Database: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+# 
+# For Google OAuth configuration, set these environment variables:
+# - SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID
+# - SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET

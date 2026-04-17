@@ -5,18 +5,22 @@ This directory contains rules and context that AI agents should follow when work
 ## Available Rules
 
 ### project-architecture.md
+
 Quick reference guide for project architecture, key patterns, and common tasks. All agents should read this file before making code changes.
 
 **Key points:**
+
 - Links to detailed architecture documentation
 - Quick reference for common tasks
 - Critical "don'ts" to avoid common mistakes
 - File structure overview
 
 ### documentation.md
+
 Documentation management rules and structure. Read this before creating or modifying any documentation.
 
 **Key points:**
+
 - Documentation hierarchy and structure
 - Where to put different types of content
 - When to update which files
@@ -27,7 +31,7 @@ Documentation management rules and structure. Read this before creating or modif
 
 - **DOCS_INDEX.md** (root) — Master index of all documentation
 - **ARCHITECTURE.md** (root) — Complete project architecture and component documentation
-- **_bmad-output/project-context.md** — Detailed implementation rules and tech stack specifics
+- **\_bmad-output/project-context.md** — Detailed implementation rules and tech stack specifics
 
 ## Usage
 

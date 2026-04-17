@@ -2,9 +2,20 @@
 project_name: 'font-generator'
 user_name: 'Artemiy'
 date: '2026-04-01'
-sections_completed: ['technology_stack', 'language_rules', 'framework_rules', 'testing_rules', 'quality_rules', 'font_pipeline', 'anti_patterns']
+sections_completed:
+  [
+    'technology_stack',
+    'language_rules',
+    'framework_rules',
+    'testing_rules',
+    'quality_rules',
+    'font_pipeline',
+    'anti_patterns',
+    'task_standards',
+    'ui_components',
+  ]
 status: 'complete'
-rule_count: 28
+rule_count: 43
 optimized_for_llm: true
 ---
 
@@ -48,6 +59,16 @@ _Critical rules and patterns that AI agents must follow when implementing code i
 - After any mutation affecting tile generation (`fonts`, `images`, `textInputs`), call `generateAllTiles` and update `tiles` in the **same action**
 - `App.tsx` is the font injection entry point — font setup runs in `useEffect` on mount
 
+### UI Components & shadcn/ui
+
+- **Prefer shadcn/ui components** — always use shadcn components instead of building custom UI from scratch
+- Only write custom components when you need to **compose** multiple shadcn components together
+- Custom wrapper components should have **clear, minimal props** — avoid complex or unclear APIs
+- Examples of acceptable custom components:
+  - A `<FormField>` that combines `<Label>` + `<Input>` + `<ErrorMessage>` from shadcn
+  - A `<ConfirmDialog>` that wraps shadcn's `<AlertDialog>` with specific behavior
+- When in doubt, check if shadcn provides the component first before writing custom code
+
 ### Font Pipeline Rules
 
 Three font sources — each requires its own injection mechanism:
@@ -61,6 +82,7 @@ Vite proxies `/upload-font` → `http://localhost:3001` in dev. Production requi
 ### Code Quality & Style
 
 **Prettier config (enforced — never skip):**
+
 - No semicolons
 - Single quotes
 - 2-space indent
@@ -69,18 +91,60 @@ Vite proxies `/upload-font` → `http://localhost:3001` in dev. Production requi
 - Tailwind class order sorted automatically by `prettier-plugin-tailwindcss`
 
 **CSS conventions:**
+
 - Existing components use BEM-style class names — **do not enforce BEM on new code**
 - New components: use simple, flat, descriptive class names (e.g. `.actions`, `.label`, `.overlay`)
 - CSS files co-located with their component
 - Prefer Tailwind utility classes for layout; component CSS files for structural or stateful styles
 
 **File naming:**
+
 - Components: PascalCase folder + `index.tsx` (`Tile/index.tsx`)
 - Utilities: camelCase (`exportTile.ts`, `tileGenerator.ts`)
 
 ### Testing Rules
 
 - No test setup currently exists — do not add test files unless explicitly requested
+- **Never write tests automatically** — tests should only be created when the user explicitly requests them
+- **Never include test examples in task descriptions** — keep task artifacts focused on implementation only
+- If test coverage is needed, the user will request it separately as a dedicated task
+
+### Task & Documentation Standards
+
+**Task Description Policy:**
+
+- Keep task descriptions **minimal** — include only essential information needed for implementation
+- Optimize for readability and token efficiency without sacrificing quality
+- Avoid verbose explanations, unnecessary context, or speculative details
+- Focus on what needs to be done, not how to test it (unless explicitly requested)
+
+**Artifact Structure:**
+
+Use hierarchical epic/task structure for all implementation artifacts:
+
+```
+Epic 1 - Name
+  1.1 - Task name
+  1.2 - Task name
+Epic 2 - Name
+  2.1 - Task name
+  2.2 - Task name
+```
+
+**Task Status Tracking:**
+
+- When all task conditions are completed, add **"Done-"** or **"✓-"** prefix before the task number in the filename
+- Examples:
+  - `Done-1.1-implement-auth.md`
+  - `✓-1.1-implement-auth.md`
+  - `Done-2.3-setup-storage.md`
+
+**Documentation Policy:**
+
+- **Never create large README files automatically** — write documentation only when explicitly requested
+- If extensive documentation seems necessary, ask the user first whether they need a detailed guide
+- Keep inline code comments minimal and focused on non-obvious logic only
+- Avoid creating "how-to" guides, tutorials, or manuals unless the user specifically asks for them
 
 ### Critical Don't-Miss Rules
 
@@ -100,4 +164,4 @@ Vite proxies `/upload-font` → `http://localhost:3001` in dev. Production requi
 
 **For Humans:** Update when the tech stack or conventions change. Keep it lean — remove rules that become obvious over time.
 
-_Last Updated: 2026-04-01_
+_Last Updated: 2026-04-17_

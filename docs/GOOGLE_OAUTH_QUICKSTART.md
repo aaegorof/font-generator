@@ -69,6 +69,7 @@ http://127.0.0.1:54321/auth/v1/authorize?provider=google&redirect_to=http://loca
 ## Need More Details?
 
 See [GOOGLE_OAUTH_SETUP.md](./GOOGLE_OAUTH_SETUP.md) for complete step-by-step instructions including:
+
 - OAuth consent screen setup
 - Test user configuration
 - Troubleshooting
@@ -87,6 +88,7 @@ npx supabase stop && npx supabase start
 ### "redirect_uri_mismatch"
 
 **Solution**: Ensure redirect URIs in Google Console exactly match:
+
 - `http://127.0.0.1:54321/auth/v1/callback`
 - `http://localhost:5173/auth/callback`
 
@@ -110,6 +112,7 @@ The user record is automatically created in `auth.users` table in Supabase.
 ---
 
 **Quick Links**:
+
 - [Full Setup Guide](./GOOGLE_OAUTH_SETUP.md)
 - [Google Cloud Console](https://console.cloud.google.com/)
 - [Supabase Auth Docs](https://supabase.com/docs/guides/auth)

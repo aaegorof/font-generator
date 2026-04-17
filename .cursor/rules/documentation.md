@@ -57,7 +57,7 @@ All project documentation follows a strict hierarchy. Always check and update re
    - Documentation management rules
    - Update when: Changing documentation structure
 
-3. **_bmad-output/project-context.md**
+3. **\_bmad-output/project-context.md**
    - Detailed implementation rules
    - Tech stack specifics
    - Update when: Changing tech stack or adding critical rules
@@ -65,40 +65,47 @@ All project documentation follows a strict hierarchy. Always check and update re
 ## Documentation Principles
 
 ### 1. Single Source of Truth
+
 - Each piece of information should exist in exactly ONE place
 - Other documents should LINK to it, not duplicate it
 - If you find duplicate content, consolidate it
 
 ### 2. Clear Hierarchy
+
 - README.md → Quick overview + links
 - DOCS_INDEX.md → Navigation hub
 - Specific docs → Detailed information
 
 ### 3. Consistent Locations
+
 - **Root level**: Main docs (README, QUICK_START, ARCHITECTURE)
 - **docs/**: Infrastructure and setup guides
 - **.cursor/rules/**: AI agent rules
-- **_bmad-output/**: BMad-generated context
+- **\_bmad-output/**: BMad-generated context
 - **Component folders**: Component-specific READMEs
 
 ### 4. No Orphaned Files
+
 - Every documentation file must be referenced in DOCS_INDEX.md
 - If removing a doc, remove all references to it
 
 ## When Making Changes
 
 ### Before Adding New Documentation
+
 1. Check if information already exists elsewhere
 2. If yes, update existing doc instead of creating new one
 3. If no, choose appropriate location based on hierarchy above
 
 ### After Adding/Modifying Documentation
+
 1. Update DOCS_INDEX.md with new file or changed content
 2. Update README.md if it's a major addition
 3. Update relevant .cursor/rules/ if it affects AI agents
 4. Check for broken links
 
 ### Before Removing Documentation
+
 1. Search for all references to the file
 2. Update or remove all references
 3. Consider if content should be moved elsewhere instead of deleted
@@ -127,14 +134,14 @@ When you create or modify documentation:
 
 ## Quick Reference: Where to Put What
 
-| Content Type | Location | Example |
-|-------------|----------|---------|
-| Project overview | README.md | What is this project |
-| Quick start guide | QUICK_START.md | How to get started |
-| Architecture details | ARCHITECTURE.md | Component structure |
-| Visual diagrams | ARCHITECTURE_DIAGRAM.md | Data flow diagrams |
-| Infrastructure setup | docs/{TOPIC}.md | Supabase setup |
-| Component-specific | {component}/README.md | Font files guide |
-| AI agent rules | .cursor/rules/{topic}.md | Critical patterns |
-| Implementation rules | _bmad-output/project-context.md | Tech stack rules |
-| Documentation index | DOCS_INDEX.md | Navigation hub |
+| Content Type         | Location                         | Example              |
+| -------------------- | -------------------------------- | -------------------- |
+| Project overview     | README.md                        | What is this project |
+| Quick start guide    | QUICK_START.md                   | How to get started   |
+| Architecture details | ARCHITECTURE.md                  | Component structure  |
+| Visual diagrams      | ARCHITECTURE_DIAGRAM.md          | Data flow diagrams   |
+| Infrastructure setup | docs/{TOPIC}.md                  | Supabase setup       |
+| Component-specific   | {component}/README.md            | Font files guide     |
+| AI agent rules       | .cursor/rules/{topic}.md         | Critical patterns    |
+| Implementation rules | \_bmad-output/project-context.md | Tech stack rules     |
+| Documentation index  | DOCS_INDEX.md                    | Navigation hub       |

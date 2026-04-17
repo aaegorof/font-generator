@@ -3,14 +3,8 @@ import { useStore } from '../../../store/useStore'
 import type { TextInput } from '../../../types'
 
 export function SettingsPage() {
-  const {
-    settings,
-    updateSettings,
-    textInputs,
-    addTextInput,
-    removeTextInput,
-    updateTextInput,
-  } = useStore()
+  const { settings, updateSettings, textInputs, addTextInput, removeTextInput, updateTextInput } =
+    useStore()
 
   return (
     <div className="toolbar__panel">
@@ -63,7 +57,6 @@ export function SettingsPage() {
           />
         ))}
       </div>
-
     </div>
   )
 }
@@ -269,7 +262,15 @@ function PlusIcon() {
 
 function AlignLeftIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
       <line x1="3" y1="6" x2="21" y2="6" />
       <line x1="3" y1="12" x2="15" y2="12" />
       <line x1="3" y1="18" x2="18" y2="18" />
@@ -279,7 +280,15 @@ function AlignLeftIcon() {
 
 function AlignCenterIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
       <line x1="3" y1="6" x2="21" y2="6" />
       <line x1="6" y1="12" x2="18" y2="12" />
       <line x1="4" y1="18" x2="20" y2="18" />
@@ -289,7 +298,15 @@ function AlignCenterIcon() {
 
 function AlignRightIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
       <line x1="3" y1="6" x2="21" y2="6" />
       <line x1="9" y1="12" x2="21" y2="12" />
       <line x1="6" y1="18" x2="21" y2="18" />
@@ -299,7 +316,15 @@ function AlignRightIcon() {
 
 function AlignTopIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
       <line x1="3" y1="3" x2="21" y2="3" />
       <rect x="7" y="6" width="4" height="14" rx="1" />
       <rect x="13" y="6" width="4" height="9" rx="1" />
@@ -309,7 +334,15 @@ function AlignTopIcon() {
 
 function AlignVCenterIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
       <line x1="3" y1="12" x2="21" y2="12" />
       <rect x="7" y="4" width="4" height="16" rx="1" />
       <rect x="13" y="7" width="4" height="10" rx="1" />
@@ -319,11 +352,18 @@ function AlignVCenterIcon() {
 
 function AlignBottomIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
       <line x1="3" y1="21" x2="21" y2="21" />
       <rect x="7" y="4" width="4" height="14" rx="1" />
       <rect x="13" y="9" width="4" height="9" rx="1" />
     </svg>
   )
 }
-
