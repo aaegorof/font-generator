@@ -114,7 +114,7 @@ export const useStore = create<AppStore>()(
             id: `input-${Date.now()}`,
             text: 'Text',
             ...DEFAULT_TEXT_INPUT_STYLE,
-            verticalAlignment: 'bottom',
+            verticalAlignment: 'center',
           }
           set((state) => ({ textInputs: [...state.textInputs, newInput] }))
           const { fonts, textInputs, layerFontPins } = get()

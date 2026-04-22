@@ -27,13 +27,36 @@ export function useSupabaseSync(userId: string | null): UseSupabaseSyncReturn {
   const [syncing, setSyncing] = useState(false)
   const [lastSynced, setLastSynced] = useState<Date | null>(null)
   const [error, setError] = useState<Error | null>(null)
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false)
 
   const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const lastStateRef = useRef<string | undefined>(undefined)
 
-  // Subscribe to store changes
+  // Load data on mount FIRST
   useEffect(() => {
-    if (!userId) return
+    if (!userId) {
+      // User logged out - reset sync state
+      setInitialLoadComplete(false)
+      setLastSynced(null)
+      setError(null)
+      lastStateRef.current = undefined
+      
+      // Clear any pending saves
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+        saveTimeoutRef.current = undefined
+      }
+      
+      console.log('✓ Sync disabled - user logged out, localStorage will be used')
+      return
+    }
+    
+    loadFromSupabase(userId)
+  }, [userId])
+
+  // Subscribe to store changes ONLY after initial load
+  useEffect(() => {
+    if (!userId || !initialLoadComplete) return
 
     const unsubscribe = useStore.subscribe((state) => {
       // Get only persisted state
@@ -70,13 +93,7 @@ export function useSupabaseSync(userId: string | null): UseSupabaseSyncReturn {
         clearTimeout(saveTimeoutRef.current)
       }
     }
-  }, [userId])
-
-  // Load data on mount
-  useEffect(() => {
-    if (!userId) return
-    loadFromSupabase(userId)
-  }, [userId])
+  }, [userId, initialLoadComplete])
 
   const saveToSupabase = async (userId: string, state: PersistedState) => {
     setSyncing(true)
@@ -127,7 +144,11 @@ export function useSupabaseSync(userId: string | null): UseSupabaseSyncReturn {
         .single()
 
       if (loadError) throw loadError
-      if (!data) return
+      if (!data) {
+        // No data in DB yet - mark as loaded and let subscription start
+        setInitialLoadComplete(true)
+        return
+      }
 
       // Update store with loaded data
       const store = useStore.getState()
@@ -157,7 +178,6 @@ export function useSupabaseSync(userId: string | null): UseSupabaseSyncReturn {
 
           // Add all loaded inputs
           loadedInputs.forEach((input) => {
-            store.addTextInput()
             const newInput = store.textInputs[store.textInputs.length - 1]
             store.updateTextInput(newInput.id, {
               text: input.text,
@@ -217,9 +237,38 @@ export function useSupabaseSync(userId: string | null): UseSupabaseSyncReturn {
       }
 
       setLastSynced(new Date(data.updated_at))
+
+      // CRITICAL: Set the current state as baseline BEFORE enabling subscription
+      // This prevents the subscription from treating loaded data as a "change"
+      const loadedState = useStore.getState()
+      const persistedState = {
+        settings: loadedState.settings,
+        textInputs: loadedState.textInputs,
+        fonts: loadedState.fonts,
+        images: loadedState.images,
+        disabledImages: loadedState.disabledImages,
+        favorites: loadedState.favorites,
+        toolbarOpen: loadedState.toolbarOpen,
+        layerFontPins: loadedState.layerFontPins,
+      }
+      lastStateRef.current = JSON.stringify(persistedState)
+
+      // For authenticated users, clear localStorage - Supabase is the source of truth
+      // This prevents conflicts between localStorage and database
+      try {
+        localStorage.removeItem('font-generator-store')
+        console.log('✓ localStorage cleared - using Supabase as source of truth')
+      } catch (e) {
+        console.warn('Could not clear localStorage:', e)
+      }
+
+      // Now it's safe to enable subscription - data is loaded and baseline is set
+      setInitialLoadComplete(true)
     } catch (err) {
       console.error('Error loading from Supabase:', err)
       setError(err as Error)
+      // Still mark as complete to avoid hanging the app
+      setInitialLoadComplete(true)
     }
   }
 
