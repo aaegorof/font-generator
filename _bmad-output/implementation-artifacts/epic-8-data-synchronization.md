@@ -1,6 +1,6 @@
 ---
-epic: "Epic 8: Data Synchronization"
-status: "ready-for-dev"
+epic: 'Epic 8: Data Synchronization'
+status: 'ready-for-dev'
 ---
 
 # Epic 8: Data Synchronization
@@ -16,11 +16,13 @@ status: "ready-for-dev"
 ## Stories
 
 ### 8.1: Create Sync Hook ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 7.4  
 **Description:** Создать hook для автоматической синхронизации Zustand store с Supabase.
 
 **Key Deliverables:**
+
 - `src/hooks/useSupabaseSync.ts` — Sync hook with debouncing
 - Subscribe to store changes
 - Debounced save (2 seconds)
@@ -29,11 +31,13 @@ status: "ready-for-dev"
 ---
 
 ### 8.2: Sync User Profile ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 8.1  
 **Description:** Синхронизировать основные настройки пользователя (settings, textInputs, toolbar, pins, disabled images).
 
 **Key Deliverables:**
+
 - Enhanced `useSupabaseSync` with full profile sync
 - `src/utils/validation.ts` — Data validation
 - Bidirectional sync for all profile fields
@@ -41,11 +45,13 @@ status: "ready-for-dev"
 ---
 
 ### 8.3: Sync Fonts ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 8.2  
 **Description:** Синхронизировать шрифты (Google Fonts, локальные, загруженные) с таблицей `user_fonts`.
 
 **Key Deliverables:**
+
 - `src/services/fontSync.ts` — Font sync service
 - CRUD operations for fonts
 - Integration with store actions
@@ -54,11 +60,13 @@ status: "ready-for-dev"
 ---
 
 ### 8.4: Sync Images ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 8.2  
 **Description:** Синхронизировать изображения с таблицей `user_images`.
 
 **Key Deliverables:**
+
 - `src/services/imageSync.ts` — Image sync service
 - CRUD operations for images
 - Integration with store actions
@@ -67,11 +75,13 @@ status: "ready-for-dev"
 ---
 
 ### 8.5: Sync Favorites ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 8.2  
 **Description:** Синхронизировать избранные тайлы с таблицей `user_favorites`.
 
 **Key Deliverables:**
+
 - `src/services/favoriteSync.ts` — Favorite sync service
 - Full snapshot storage (tile + textInput)
 - CRUD operations for favorites

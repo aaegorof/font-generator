@@ -19,9 +19,11 @@ As Artemiy, I want the app to automatically discover font files from the `/publi
 ## Desired Behavior
 
 1. `server.js` exposes a new endpoint `GET /list-fonts` that reads the `public/fonts/` directory and returns a JSON array of filename stems (without extension, deduplicated), e.g.:
+
    ```json
    ["Collidge-Regular", "Collidge-Rounded", "Gibson", "horta", ...]
    ```
+
    - Only files with extensions `.woff`, `.woff2`, `.ttf`, `.otf` are included.
    - The `README.md` (and any non-font file) in the directory is ignored.
    - Stems are deduplicated (a font available as both `.woff2` and `.ttf` appears once).
@@ -57,6 +59,7 @@ As Artemiy, I want the app to automatically discover font files from the `/publi
 ## Files to Change
 
 ### `server.js`
+
 - Import `fs` (already available in Node, no new deps).
 - Add route `GET /list-fonts`:
   - Read `public/fonts/` with `fs.readdirSync`.
@@ -64,25 +67,29 @@ As Artemiy, I want the app to automatically discover font files from the `/publi
   - Return `res.json(stemsArray)`.
 
 ### `vite.config.ts`
+
 - Add `/list-fonts` to `server.proxy`.
 
 ### `src/utils/fonts.ts`
+
 - Remove `localFontFileNames` array and `LOCAL_FONTS` constant.
 - Change `DEFAULT_FONTS` to export only `GOOGLE_FONT_DEFS`.
 - Export new `fetchLocalFonts(): Promise<FontDef[]>` function.
 
 ### `src/App.tsx`
+
 - Import `fetchLocalFonts` from `utils/fonts`.
 - In the initial `useEffect`, after `setupGoogleFonts()`:
   ```ts
   fetchLocalFonts().then((localFonts) => {
-    const { fonts, addFontsBatch } = useStore.getState()  // or use a new store action
+    const { fonts, addFontsBatch } = useStore.getState() // or use a new store action
     // replace all source:'local' fonts with fresh list
   })
   ```
 - Add a new store action `setLocalFonts(fonts: FontDef[])` to `useStore.ts` that replaces all `source: 'local'` entries and re-generates tiles.
 
 ### `src/store/useStore.ts`
+
 - Add `setLocalFonts` action to `AppActions` interface and implementation.
 
 ---

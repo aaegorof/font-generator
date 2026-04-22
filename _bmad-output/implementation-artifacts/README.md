@@ -17,16 +17,17 @@
 
 ### Stories
 
-| Story | Title | Status | Dependencies | File |
-|-------|-------|--------|--------------|------|
-| 7.1 | Install Supabase Client | ready-for-dev | 6.1 | [7.1-install-supabase-client.md](7.1-install-supabase-client.md) |
-| 7.2 | Create Auth Hook | ready-for-dev | 7.1 | [7.2-create-auth-hook.md](7.2-create-auth-hook.md) |
-| 7.3 | Build Auth UI - Login/Logout | ready-for-dev | 6.2, 7.1, 7.2 | [7.3-auth-ui-login-logout.md](7.3-auth-ui-login-logout.md) |
-| 7.4 | Handle Auth Flow | ready-for-dev | 7.2, 7.3 | [7.4-handle-auth-flow.md](7.4-handle-auth-flow.md) |
+| Story | Title                        | Status        | Dependencies  | File                                                             |
+| ----- | ---------------------------- | ------------- | ------------- | ---------------------------------------------------------------- |
+| 7.1   | Install Supabase Client      | ready-for-dev | 6.1           | [7.1-install-supabase-client.md](7.1-install-supabase-client.md) |
+| 7.2   | Create Auth Hook             | ready-for-dev | 7.1           | [7.2-create-auth-hook.md](7.2-create-auth-hook.md)               |
+| 7.3   | Build Auth UI - Login/Logout | ready-for-dev | 6.2, 7.1, 7.2 | [7.3-auth-ui-login-logout.md](7.3-auth-ui-login-logout.md)       |
+| 7.4   | Handle Auth Flow             | ready-for-dev | 7.2, 7.3      | [7.4-handle-auth-flow.md](7.4-handle-auth-flow.md)               |
 
 **Goal:** Реализовать полный цикл авторизации через Google OAuth
 
 **Key Deliverables:**
+
 - Supabase client setup
 - Auth hook (`useAuth`)
 - Auth UI components
@@ -39,17 +40,18 @@
 
 ### Stories
 
-| Story | Title | Status | Dependencies | File |
-|-------|-------|--------|--------------|------|
-| 8.1 | Create Sync Hook | ready-for-dev | 7.4 | [8.1-create-sync-hook.md](8.1-create-sync-hook.md) |
-| 8.2 | Sync User Profile | ready-for-dev | 8.1 | [8.2-sync-user-profile.md](8.2-sync-user-profile.md) |
-| 8.3 | Sync Fonts | ready-for-dev | 8.2 | [8.3-sync-fonts.md](8.3-sync-fonts.md) |
-| 8.4 | Sync Images | ready-for-dev | 8.2 | [8.4-sync-images.md](8.4-sync-images.md) |
-| 8.5 | Sync Favorites | ready-for-dev | 8.2 | [8.5-sync-favorites.md](8.5-sync-favorites.md) |
+| Story | Title             | Status        | Dependencies | File                                                 |
+| ----- | ----------------- | ------------- | ------------ | ---------------------------------------------------- |
+| 8.1   | Create Sync Hook  | ready-for-dev | 7.4          | [8.1-create-sync-hook.md](8.1-create-sync-hook.md)   |
+| 8.2   | Sync User Profile | ready-for-dev | 8.1          | [8.2-sync-user-profile.md](8.2-sync-user-profile.md) |
+| 8.3   | Sync Fonts        | ready-for-dev | 8.2          | [8.3-sync-fonts.md](8.3-sync-fonts.md)               |
+| 8.4   | Sync Images       | ready-for-dev | 8.2          | [8.4-sync-images.md](8.4-sync-images.md)             |
+| 8.5   | Sync Favorites    | ready-for-dev | 8.2          | [8.5-sync-favorites.md](8.5-sync-favorites.md)       |
 
 **Goal:** Автоматическая двусторонняя синхронизация всех данных с Supabase
 
 **Key Deliverables:**
+
 - Sync hook (`useSupabaseSync`)
 - Sync services (fonts, images, favorites)
 - Data validation
@@ -62,16 +64,17 @@
 
 ### Stories
 
-| Story | Title | Status | Dependencies | File |
-|-------|-------|--------|--------------|------|
-| 9.1 | Font Upload to Storage | ready-for-dev | 6.4, 8.3 | [9.1-font-upload-to-storage.md](9.1-font-upload-to-storage.md) |
-| 9.2 | Image Upload to Storage | ready-for-dev | 6.4, 8.4 | [9.2-image-upload-to-storage.md](9.2-image-upload-to-storage.md) |
-| 9.3 | File Deletion from Storage | ready-for-dev | 9.1, 9.2 | [9.3-file-deletion-from-storage.md](9.3-file-deletion-from-storage.md) |
-| 9.4 | Express Server Decision | ready-for-dev | 9.1, 9.2, 9.3 | [9.4-express-server-decision.md](9.4-express-server-decision.md) |
+| Story | Title                      | Status        | Dependencies  | File                                                                   |
+| ----- | -------------------------- | ------------- | ------------- | ---------------------------------------------------------------------- |
+| 9.1   | Font Upload to Storage     | ready-for-dev | 6.4, 8.3      | [9.1-font-upload-to-storage.md](9.1-font-upload-to-storage.md)         |
+| 9.2   | Image Upload to Storage    | ready-for-dev | 6.4, 8.4      | [9.2-image-upload-to-storage.md](9.2-image-upload-to-storage.md)       |
+| 9.3   | File Deletion from Storage | ready-for-dev | 9.1, 9.2      | [9.3-file-deletion-from-storage.md](9.3-file-deletion-from-storage.md) |
+| 9.4   | Express Server Decision    | ready-for-dev | 9.1, 9.2, 9.3 | [9.4-express-server-decision.md](9.4-express-server-decision.md)       |
 
 **Goal:** Миграция файлового хранилища на Supabase Storage
 
 **Key Deliverables:**
+
 - Font upload to Storage
 - Image upload to Storage
 - Cascade file deletion
@@ -114,17 +117,20 @@ Epic 9 (Ready)
 ## Implementation Order
 
 ### Phase 1: Authentication (Epic 7)
+
 1. Story 7.1: Install Supabase Client
 2. Story 7.2: Create Auth Hook
 3. Story 7.3: Build Auth UI
 4. Story 7.4: Handle Auth Flow
 
 ### Phase 2: Data Sync (Epic 8)
+
 1. Story 8.1: Create Sync Hook
 2. Story 8.2: Sync User Profile
 3. Stories 8.3, 8.4, 8.5: Sync Fonts, Images, Favorites (parallel)
 
 ### Phase 3: File Storage (Epic 9)
+
 1. Stories 9.1, 9.2: Font & Image Upload (parallel)
 2. Story 9.3: File Deletion
 3. Story 9.4: Express Server Decision
@@ -136,28 +142,33 @@ Epic 9 (Ready)
 ### New Files Created
 
 **Hooks:**
+
 - `src/hooks/useAuth.ts` — Authentication hook
 - `src/hooks/useAuthCallback.ts` — OAuth callback handler
 - `src/hooks/useUserData.ts` — User data loader
 - `src/hooks/useSupabaseSync.ts` — Data synchronization hook
 
 **Services:**
+
 - `src/services/fontSync.ts` — Font CRUD and upload
 - `src/services/imageSync.ts` — Image CRUD and upload
 - `src/services/favoriteSync.ts` — Favorite CRUD
 - `src/services/batchDelete.ts` — Batch deletion
 
 **Components:**
+
 - `src/components/Auth/AuthButton.tsx` — Sign in/out button
 - `src/components/Auth/AuthModal.tsx` — Auth modal (optional)
 - `src/components/ConfirmDialog.tsx` — Confirmation dialog
 
 **Utils:**
+
 - `src/lib/supabase.ts` — Supabase client
 - `src/utils/auth.ts` — Auth helpers
 - `src/utils/validation.ts` — Data validation
 
 **Types:**
+
 - `src/types/supabase.ts` — Supabase TypeScript types
 
 ---
@@ -165,18 +176,21 @@ Epic 9 (Ready)
 ## Testing Strategy
 
 ### Unit Tests
+
 - Auth hook tests
 - Sync hook tests
 - Service layer tests
 - Validation tests
 
 ### Integration Tests
+
 - Full auth flow
 - Data synchronization
 - File upload/delete
 - OAuth callback
 
 ### Manual Testing
+
 - Each story includes detailed manual testing scenarios
 - Verification checklists
 - Edge cases
@@ -186,12 +200,14 @@ Epic 9 (Ready)
 ## Documentation
 
 ### Related Documents
+
 - [PRD: Supabase Integration](../PRD-supabase-integration.md)
 - [Supabase Setup Guide](../../docs/SUPABASE.md)
 - [Google OAuth Setup](../../docs/GOOGLE_OAUTH_SETUP.md)
 - [Google OAuth Quickstart](../../docs/GOOGLE_OAUTH_QUICKSTART.md)
 
 ### External References
+
 - [Supabase Documentation](https://supabase.com/docs)
 - [Supabase Auth](https://supabase.com/docs/guides/auth)
 - [Supabase Storage](https://supabase.com/docs/guides/storage)

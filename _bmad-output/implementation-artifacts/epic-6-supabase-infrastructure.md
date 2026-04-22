@@ -10,24 +10,26 @@
 
 ## Stories Overview
 
-| Story | Title | Effort | Status |
-|-------|-------|--------|--------|
-| 6.1 | Setup Docker Compose для Supabase | 1 день | Not Started |
-| 6.2 | Configure Google OAuth | 0.5 дня | Not Started |
-| 6.3 | Create Database Schema | 1 день | Not Started |
-| 6.4 | Setup Storage Buckets | 0.5 дня | Not Started |
-| 6.5 | Test Infrastructure | 0.5 дня | Not Started |
+| Story | Title                             | Effort  | Status      |
+| ----- | --------------------------------- | ------- | ----------- |
+| 6.1   | Setup Docker Compose для Supabase | 1 день  | Not Started |
+| 6.2   | Configure Google OAuth            | 0.5 дня | Not Started |
+| 6.3   | Create Database Schema            | 1 день  | Not Started |
+| 6.4   | Setup Storage Buckets             | 0.5 дня | Not Started |
+| 6.5   | Test Infrastructure               | 0.5 дня | Not Started |
 
 ---
 
 ## Dependencies
 
 **Requires:**
+
 - Docker Desktop установлен и запущен
 - Google Cloud Console аккаунт
 - Базовое понимание PostgreSQL
 
 **Blocks:**
+
 - Epic 2: Authentication Integration
 - Epic 3: Data Synchronization
 - Epic 4: File Storage Migration

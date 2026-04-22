@@ -1,6 +1,6 @@
 ---
-epic: "Epic 9: File Storage Migration"
-status: "ready-for-dev"
+epic: 'Epic 9: File Storage Migration'
+status: 'ready-for-dev'
 ---
 
 # Epic 9: File Storage Migration
@@ -16,11 +16,13 @@ status: "ready-for-dev"
 ## Stories
 
 ### 9.1: Font Upload to Storage ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 6.4, 8.3  
 **Description:** Мигрировать загрузку шрифтов на Supabase Storage bucket `user-fonts`.
 
 **Key Deliverables:**
+
 - Enhanced `src/services/fontSync.ts` with upload methods
 - File validation (size, type)
 - Public URL generation
@@ -30,11 +32,13 @@ status: "ready-for-dev"
 ---
 
 ### 9.2: Image Upload to Storage ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 6.4, 8.4  
 **Description:** Мигрировать загрузку изображений на Supabase Storage bucket `user-images`.
 
 **Key Deliverables:**
+
 - Enhanced `src/services/imageSync.ts` with upload methods
 - File validation (size, type)
 - Public URL generation
@@ -44,11 +48,13 @@ status: "ready-for-dev"
 ---
 
 ### 9.3: File Deletion from Storage ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 9.1, 9.2  
 **Description:** Обеспечить каскадное удаление файлов из Storage при удалении через UI.
 
 **Key Deliverables:**
+
 - Cascade delete: DB record → Storage file
 - `src/services/batchDelete.ts` — Batch deletion service
 - `src/components/ConfirmDialog.tsx` — Confirmation dialog
@@ -58,11 +64,13 @@ status: "ready-for-dev"
 ---
 
 ### 9.4: Express Server Decision ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 9.1, 9.2, 9.3  
 **Description:** Оценить необходимость Express сервера и принять решение о его судьбе.
 
 **Key Deliverables:**
+
 - Analysis of Express server usage
 - Decision documentation
 - Code cleanup (if removing server)
@@ -70,6 +78,7 @@ status: "ready-for-dev"
 - Removed dependencies (if removing server)
 
 **Recommended Decision:** Remove Express server completely
+
 - Supabase Storage заменяет весь функционал
 - Упрощение архитектуры
 - Неавторизованные пользователи работают через localStorage

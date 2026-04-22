@@ -1,6 +1,6 @@
 ---
-epic: "Epic 7: Authentication Integration"
-status: "in-progress"
+epic: 'Epic 7: Authentication Integration'
+status: 'in-progress'
 ---
 
 # Epic 7: Authentication Integration
@@ -16,11 +16,13 @@ status: "in-progress"
 ## Stories
 
 ### 7.1: Install Supabase Client ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 6.1  
 **Description:** Установить Supabase JavaScript клиент и настроить environment variables.
 
 **Key Deliverables:**
+
 - `src/lib/supabase.ts` — Supabase client initialization
 - `.env.local` — Environment variables
 - `.env.example` — Environment variables template
@@ -28,22 +30,26 @@ status: "in-progress"
 ---
 
 ### 7.2: Create Auth Hook ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 7.1  
 **Description:** Создать React hook для управления состоянием авторизации.
 
 **Key Deliverables:**
+
 - `src/hooks/useAuth.ts` — Auth hook with sign in/out methods
 - TypeScript types for User and Session
 
 ---
 
 ### 7.3: Build Auth UI - Login/Logout Buttons ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 6.2, 7.1, 7.2  
 **Description:** Создать UI компоненты для авторизации (кнопки входа/выхода, отображение email).
 
 **Key Deliverables:**
+
 - `src/components/Auth/AuthButton.tsx` — Sign in/out button
 - `src/components/Auth/AuthModal.tsx` — Auth modal (optional)
 - Integration in StatusBar or TopBar
@@ -51,11 +57,13 @@ status: "in-progress"
 ---
 
 ### 7.4: Handle Auth Flow ✅
+
 **Status:** ready-for-dev  
 **Dependencies:** 7.2, 7.3  
 **Description:** Обработать OAuth callback, загрузку данных пользователя и создание профиля при первом входе.
 
 **Key Deliverables:**
+
 - `src/hooks/useAuthCallback.ts` — OAuth callback handler
 - `src/hooks/useUserData.ts` — User data loader
 - Profile creation logic for first-time users

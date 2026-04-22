@@ -31,6 +31,7 @@ As Artemiy, when I upload an image file through the Images panel, I want it to b
 ## Files to Change
 
 ### `server.js`
+
 - Add `multer.diskStorage` config pointing to `public/images/` (mirror the existing font upload setup).
 - Add file filter accepting `image/jpeg, image/png, image/gif, image/webp, image/svg+xml`.
 - Add route `POST /upload-image`:
@@ -39,9 +40,11 @@ As Artemiy, when I upload an image file through the Images panel, I want it to b
 - Serve `/images` as a static directory (for dev server; Vite/prod serves `public/` natively).
 
 ### `vite.config.ts`
+
 - Add `/upload-image` and `/images` to the `server.proxy` object.
 
 ### `src/components/Toolbar/pages/ImagesPage.tsx`
+
 - Replace `URL.createObjectURL(file)` call with an async `fetch('/upload-image', …)` POST.
 - Add local `uploadError` state (string | null); display it below the upload button.
 - On 409 response, set the error message; on success, clear it and call `addImage(url)`.

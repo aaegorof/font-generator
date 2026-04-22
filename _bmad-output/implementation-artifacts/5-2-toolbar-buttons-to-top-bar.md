@@ -30,11 +30,13 @@ As Artemiy, I want Randomize, Reset, Export, and Import to live in the top bar (
 ## Files to Change
 
 ### `src/components/Toolbar/index.tsx`
+
 - Remove the `toolbar__actions` block entirely (Randomize, Reset, Export, Import, Favorites buttons + hidden import input).
 - Remove imports no longer needed: `useFontFilter`, `useCallback`, `useRef`, `useState`, `exportAllSettings`, `parseSettingsFile` — only if they're not used elsewhere in the file.
 - Remove icon components that move to StatusBar (ShuffleIcon, RefreshIcon, ExportIcon, ImportIcon, HeartIcon).
 
 ### `src/components/StatusBar/index.tsx`
+
 - Add the four action buttons on the right: Randomize, Reset, Export, Import.
 - Bring over the corresponding handler logic (`handleReset`, `handleExport`, `handleImport`) and state (`exporting`).
 - Add the hidden `<input ref={importRef} type="file" accept=".json" …>` for import.
@@ -42,11 +44,13 @@ As Artemiy, I want Randomize, Reset, Export, and Import to live in the top bar (
 - Layout: wrap existing left content in a `<div className="status-bar__left">` and add `<div className="status-bar__right">` for the buttons.
 
 ### `src/components/StatusBar/StatusBar.css`
+
 - Add flex layout to `.status-bar` with `justify-content: space-between; align-items: center`.
 - Style `.status-bar__right` as a flex row with a small gap.
 - Keep existing button styles or reuse the `toolbar__action-btn` class (whichever is tidier).
 
 ### `src/components/Toolbar/Toolbar.css`
+
 - Remove styles for `.toolbar__actions` and `.toolbar__action-btn` if they are no longer used anywhere.
 
 ---
