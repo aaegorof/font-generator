@@ -4,6 +4,10 @@ import { Grid } from './components/Grid'
 import { StatusBar } from './components/StatusBar'
 import { FavoritesViewer } from './components/FavoritesViewer'
 import { useStore } from './store/useStore'
+import { useAuth } from './hooks/useAuth'
+import { useAuthCallback } from './hooks/useAuthCallback'
+import { useUserData } from './hooks/useUserData'
+import { useSupabaseSync } from './hooks/useSupabaseSync'
 import {
   fetchLocalFonts,
   setupGoogleFonts,
@@ -15,6 +19,10 @@ import './App.css'
 
 export default function App() {
   const { fonts } = useStore()
+  const { user, loading } = useAuth()
+  const { processing, error: callbackError } = useAuthCallback()
+  useUserData(user)
+  useSupabaseSync(user?.id ?? null)
 
   useEffect(() => {
     // Set up fonts
@@ -45,6 +53,18 @@ export default function App() {
     injectLocalFontFaces(fonts)
     fonts.filter((f) => f.source === 'upload' && f.uploadUrl).forEach((f) => injectUploadedFont(f))
   }, [fonts])
+
+  if (loading || processing) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>
+  }
+
+  if (callbackError) {
+    return (
+      <div className="flex h-screen items-center justify-center text-red-600">
+        Error: {callbackError}
+      </div>
+    )
+  }
 
   return (
     <div className="app">
