@@ -5,6 +5,10 @@ import type { SettingsExport } from '../utils/exportSettings'
 import { DEFAULT_FONTS, injectUploadedFont } from '../utils/fonts'
 import { DEFAULT_IMAGES, isScannedLocalImage } from '../utils/images'
 import { generateAllTiles, randomizeTiles } from '../utils/tileGenerator'
+import { FontSyncService } from '../services/fontSync'
+import { ImageSyncService } from '../services/imageSync'
+import { FavoriteSyncService } from '../services/favoriteSync'
+import { getCurrentUserId } from '../utils/auth'
 
 const DEFAULT_SETTINGS: Settings = {
   columns: 4,
@@ -55,12 +59,14 @@ interface AppActions {
 
   addFont: (font: FontDef) => void
   setLocalFonts: (fonts: FontDef[]) => void
+  setUserFonts: (fonts: FontDef[]) => void
   removeFont: (id: string) => void
   toggleFontActive: (id: string) => void
   setLayerFontPin: (layerIndex: number, fontId: string | null) => void
 
   addImage: (url: string) => void
   setLocalImages: (images: string[]) => void
+  setUserImages: (images: string[]) => void
   removeImage: (url: string) => void
   toggleImageDisabled: (url: string) => void
 
@@ -70,6 +76,7 @@ interface AppActions {
 
   addFavorite: (tile: TileData) => void
   removeFavorite: (id: string) => void
+  setUserFavorites: (favorites: FavoriteItem[]) => void
 
   toggleToolbar: () => void
   openFavoritesView: (index: number) => void
@@ -139,11 +146,37 @@ export const useStore = create<AppStore>()(
           set((state) => ({ fonts: [...state.fonts, font] }))
           const { fonts, textInputs, layerFontPins } = get()
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
+
+          // Sync to Supabase if user is logged in
+          getCurrentUserId()
+            .then((userId) => {
+              if (userId) {
+                return FontSyncService.saveFont(userId, font)
+              }
+            })
+            .catch(console.error)
         },
         setLocalFonts: (localFonts) => {
           set((state) => {
             const nonLocalFonts = state.fonts.filter((font) => font.source !== 'local')
             const fonts = [...nonLocalFonts, ...localFonts]
+            const validFontIds = new Set(fonts.map((font) => font.id))
+            const layerFontPins = Object.fromEntries(
+              Object.entries(state.layerFontPins).filter(([, fontId]) => validFontIds.has(fontId)),
+            )
+
+            return { fonts, layerFontPins }
+          })
+          const { fonts, textInputs, layerFontPins } = get()
+          set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
+        },
+        setUserFonts: (userFonts) => {
+          // Used only for loading fonts from Supabase - does NOT trigger sync
+          set((state) => {
+            // Keep default fonts, replace everything else with user fonts
+            const defaultFontIds = new Set(DEFAULT_FONTS.map((f) => f.id))
+            const defaultFonts = state.fonts.filter((font) => defaultFontIds.has(font.id))
+            const fonts = [...defaultFonts, ...userFonts.filter((f) => !defaultFontIds.has(f.id))]
             const validFontIds = new Set(fonts.map((font) => font.id))
             const layerFontPins = Object.fromEntries(
               Object.entries(state.layerFontPins).filter(([, fontId]) => validFontIds.has(fontId)),
@@ -164,6 +197,15 @@ export const useStore = create<AppStore>()(
           })
           const { fonts, textInputs, layerFontPins } = get()
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
+
+          // Sync to Supabase if user is logged in
+          getCurrentUserId()
+            .then((userId) => {
+              if (userId) {
+                return FontSyncService.deleteFont(userId, id)
+              }
+            })
+            .catch(console.error)
         },
         toggleFontActive: (id) => {
           set((state) => {
@@ -180,6 +222,18 @@ export const useStore = create<AppStore>()(
           })
           const { fonts, textInputs, layerFontPins } = get()
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
+
+          // Sync to Supabase if user is logged in
+          const font = get().fonts.find((f) => f.id === id)
+          if (font) {
+            getCurrentUserId()
+              .then((userId) => {
+                if (userId) {
+                  return FontSyncService.updateFont(userId, id, { isActive: font.isActive })
+                }
+              })
+              .catch(console.error)
+          }
         },
         setLayerFontPin: (layerIndex, fontId) => {
           set((state) => {
@@ -200,11 +254,35 @@ export const useStore = create<AppStore>()(
           set((state) => ({ images: [...state.images, url] }))
           const { fonts, textInputs, layerFontPins } = get()
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
+
+          // Sync to Supabase if user is logged in
+          getCurrentUserId()
+            .then((userId) => {
+              if (userId) {
+                const storagePath = ImageSyncService.getStoragePathFromUrl(url)
+                return ImageSyncService.saveImage(userId, url, storagePath || undefined)
+              }
+            })
+            .catch(console.error)
         },
         setLocalImages: (localImages) => {
           set((state) => {
             const nonLocalImages = state.images.filter((img) => !isScannedLocalImage(img))
             const images = [...nonLocalImages, ...localImages]
+            const imagesSet = new Set(images)
+            const disabledImages = state.disabledImages.filter((img) => imagesSet.has(img))
+            return { images, disabledImages }
+          })
+          const { fonts, textInputs, layerFontPins } = get()
+          set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
+        },
+        setUserImages: (userImages) => {
+          // Used only for loading images from Supabase - does NOT trigger sync
+          set((state) => {
+            // Merge DEFAULT_IMAGES with user images
+            const allImages = [...DEFAULT_IMAGES, ...userImages]
+            // Remove duplicates while preserving order
+            const images = [...new Set(allImages)]
             const imagesSet = new Set(images)
             const disabledImages = state.disabledImages.filter((img) => imagesSet.has(img))
             return { images, disabledImages }
@@ -219,6 +297,15 @@ export const useStore = create<AppStore>()(
           }))
           const { fonts, textInputs, layerFontPins } = get()
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
+
+          // Sync to Supabase if user is logged in
+          getCurrentUserId()
+            .then((userId) => {
+              if (userId) {
+                return ImageSyncService.deleteImage(userId, url)
+              }
+            })
+            .catch(console.error)
         },
         toggleImageDisabled: (url) => {
           set((state) => ({
@@ -280,9 +367,32 @@ export const useStore = create<AppStore>()(
             savedAt: Date.now(),
           }
           set((state) => ({ favorites: [favorite, ...state.favorites] }))
+
+          // Sync to Supabase if user is logged in
+          getCurrentUserId()
+            .then((userId) => {
+              if (userId) {
+                return FavoriteSyncService.saveFavorite(userId, favorite)
+              }
+            })
+            .catch(console.error)
         },
-        removeFavorite: (id) =>
-          set((state) => ({ favorites: state.favorites.filter((f) => f.id !== id) })),
+        removeFavorite: (id) => {
+          set((state) => ({ favorites: state.favorites.filter((f) => f.id !== id) }))
+
+          // Sync to Supabase if user is logged in
+          getCurrentUserId()
+            .then((userId) => {
+              if (userId) {
+                return FavoriteSyncService.deleteFavorite(userId, id)
+              }
+            })
+            .catch(console.error)
+        },
+        setUserFavorites: (userFavorites) => {
+          // Used only for loading favorites from Supabase - does NOT trigger sync
+          set({ favorites: userFavorites })
+        },
 
         // UI
         toggleToolbar: () => set((state) => ({ toolbarOpen: !state.toolbarOpen })),

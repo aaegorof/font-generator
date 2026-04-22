@@ -150,6 +150,8 @@ Epic 2 - Name
 
 - **Never import types without `import type`** — `verbatimModuleSyntax` breaks the build on violations
 - **Never persist `tiles` to localStorage** — tiles are always transient, regenerated on load; keep them out of `partialize`
+- **Supabase = source of truth for authenticated users** — localStorage is cleared after loading from Supabase; only used for unauthenticated users
+- **Race condition prevention** — use `initialLoadComplete` flag; subscribe to store changes ONLY after loading from Supabase; set baseline state before enabling subscription
 - **Never add `loadWeights` to `FontDef`** — it exists only in `GoogleFontEntry` and is used exclusively to build the Google Fonts CSS URL
 - **Local font filenames with spaces** — `injectLocalFontFaces` uses `localFile` as the path; `'Portico Regular'` maps to `/fonts/Portico Regular.woff2` — names must match exactly
 - **Tailwind v4** — no `@tailwind base/components/utilities` directives; the vite plugin handles injection automatically
@@ -164,4 +166,4 @@ Epic 2 - Name
 
 **For Humans:** Update when the tech stack or conventions change. Keep it lean — remove rules that become obvious over time.
 
-_Last Updated: 2026-04-17_
+_Last Updated: 2026-04-23_

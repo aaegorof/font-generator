@@ -4,6 +4,10 @@ import { supabase } from '../lib/supabase'
 import type { Settings, TextInput, FontDef, FavoriteItem } from '../types'
 import type { Json } from '../types/database.types'
 import { validateUserProfile } from '../utils/validation'
+import { FontSyncService } from '../services/fontSync'
+import { ImageSyncService } from '../services/imageSync'
+import { FavoriteSyncService } from '../services/favoriteSync'
+import { injectUploadedFont } from '../utils/fonts'
 
 export interface UseSupabaseSyncReturn {
   syncing: boolean
@@ -40,17 +44,17 @@ export function useSupabaseSync(userId: string | null): UseSupabaseSyncReturn {
       setLastSynced(null)
       setError(null)
       lastStateRef.current = undefined
-      
+
       // Clear any pending saves
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
         saveTimeoutRef.current = undefined
       }
-      
+
       console.log('✓ Sync disabled - user logged out, localStorage will be used')
       return
     }
-    
+
     loadFromSupabase(userId)
   }, [userId])
 
@@ -137,9 +141,7 @@ export function useSupabaseSync(userId: string | null): UseSupabaseSyncReturn {
     try {
       const { data, error: loadError } = await supabase
         .from('user_profiles')
-        .select(
-          'settings, text_inputs, toolbar_open, layer_font_pins, disabled_images, updated_at',
-        )
+        .select('settings, text_inputs, toolbar_open, layer_font_pins, disabled_images, updated_at')
         .eq('id', userId)
         .single()
 
@@ -234,6 +236,49 @@ export function useSupabaseSync(userId: string | null): UseSupabaseSyncReturn {
             store.toggleImageDisabled(url)
           }
         })
+      }
+
+      // Load fonts from user_fonts table
+      try {
+        const userFonts = await FontSyncService.loadFonts(userId)
+
+        // Inject uploaded fonts into the DOM before setting in store
+        userFonts.forEach((userFont) => {
+          if (userFont.source === 'upload' && userFont.uploadUrl) {
+            injectUploadedFont(userFont)
+          }
+        })
+
+        // Update store with user fonts (this will merge with DEFAULT_FONTS automatically)
+        // Using setUserFonts to avoid triggering sync back to Supabase
+        store.setUserFonts(userFonts)
+      } catch (fontErr) {
+        console.error('Error loading fonts:', fontErr)
+        // Don't throw - continue with profile load even if fonts fail
+      }
+
+      // Load images from user_images table
+      try {
+        const userImages = await ImageSyncService.loadImages(userId)
+
+        // Update store with user images (this will merge with DEFAULT_IMAGES automatically)
+        // Using setUserImages to avoid triggering sync back to Supabase
+        store.setUserImages(userImages)
+      } catch (imageErr) {
+        console.error('Error loading images:', imageErr)
+        // Don't throw - continue with profile load even if images fail
+      }
+
+      // Load favorites from user_favorites table
+      try {
+        const userFavorites = await FavoriteSyncService.loadFavorites(userId)
+
+        // Update store with user favorites
+        // Using setUserFavorites to avoid triggering sync back to Supabase
+        store.setUserFavorites(userFavorites)
+      } catch (favoriteErr) {
+        console.error('Error loading favorites:', favoriteErr)
+        // Don't throw - continue with profile load even if favorites fail
       }
 
       setLastSynced(new Date(data.updated_at))

@@ -102,6 +102,26 @@ status: 'ready-for-dev'
 
 ## Technical Notes
 
+### Data Architecture ⚠️ CRITICAL
+
+- **Supabase = единственный источник правды** для авторизованных пользователей
+  - localStorage автоматически очищается после загрузки из Supabase
+  - Нет конфликтов между localStorage и базой данных
+  - При logout localStorage снова активируется
+
+- **localStorage = источник правды** для неавторизованных пользователей
+  - Zustand persist middleware автоматически использует localStorage
+  - При авторизации данные из localStorage игнорируются
+
+### Race Condition Prevention ⚠️ CRITICAL
+
+- Реализован флаг `initialLoadComplete` (Story 8.1)
+- Store subscription активируется ТОЛЬКО после загрузки данных из Supabase
+- Устанавливается baseline state перед активацией subscription
+- Это предотвращает перезапись базы дефолтными значениями при инициализации
+
+### Sync Details
+
 - Debouncing: 2 секунды после последнего изменения
 - "Last write wins" стратегия для конфликтов
 - DEFAULT_FONTS и DEFAULT_IMAGES не сохраняются в БД
@@ -110,10 +130,20 @@ status: 'ready-for-dev'
 
 ## Data Flow
 
+### Authenticated Users
 ```
 User Action → Zustand Store → useSupabaseSync (debounced) → Supabase
-                            ↓
-                      localStorage (backup)
+                                                              ↓
+                                                    (Source of Truth)
+                                                              ↓
+Login → Load from Supabase → Clear localStorage → Set baseline → Enable subscription
+```
+
+### Unauthenticated Users
+```
+User Action → Zustand Store → Zustand Persist → localStorage
+                                                      ↓
+                                               (Source of Truth)
 ```
 
 ## Related Epics
