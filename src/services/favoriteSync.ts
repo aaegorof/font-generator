@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import type { FavoriteItem } from '../types'
+import type { Json } from '../types/database.types'
 
 /**
  * Service for synchronizing favorites between Zustand store and Supabase
@@ -23,7 +24,7 @@ export class FavoriteSyncService {
         return []
       }
 
-      return data.map((row) => row.favorite_data as FavoriteItem)
+      return data.map((row) => row.favorite_data as unknown as FavoriteItem)
     } catch (err) {
       console.error('Error loading favorites:', err)
       throw err
@@ -40,7 +41,7 @@ export class FavoriteSyncService {
 
       const { error } = await supabase.from('user_favorites').insert({
         user_id: userId,
-        favorite_data: favorite,
+        favorite_data: favorite as unknown as Json,
       })
 
       if (error) throw error

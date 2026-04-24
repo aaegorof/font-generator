@@ -1,5 +1,8 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { useStore } from '../../../store/useStore'
+import { ImageSyncService } from '../../../services/imageSync'
+import { getCurrentUserId } from '../../../utils/auth'
+import { ConfirmDialog } from '../../ConfirmDialog'
 
 function EyeIcon() {
   return (
@@ -30,12 +33,22 @@ function EyeOffIcon() {
 }
 
 export function ImagesPage() {
-  const { settings, updateSettings, images, disabledImages, toggleImageDisabled, addImage } =
-    useStore()
+  const {
+    settings,
+    updateSettings,
+    images,
+    disabledImages,
+    toggleImageDisabled,
+    addImage,
+    removeImage,
+  } = useStore()
 
   const imageUploadRef = useRef<HTMLInputElement>(null)
   const [urlInput, setUrlInput] = useState('')
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const handleImageUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,39 +57,70 @@ export function ImagesPage() {
 
       setUploadError(null)
 
-      const results = await Promise.allSettled(
-        files.map(async (file) => {
-          const formData = new FormData()
-          formData.append('file', file)
-          const res = await fetch('/upload-image', { method: 'POST', body: formData })
-          const data = (await res.json().catch(() => ({}))) as { error?: string; url?: string }
-          if (res.status === 409) {
-            throw new Error(data.error ?? 'File already exists')
-          }
-          if (!res.ok) {
-            throw new Error(data.error ?? 'Upload failed')
-          }
-          if (!data.url) throw new Error('Upload failed')
-          return data.url
-        }),
-      )
-
-      const errors: string[] = []
-      for (let i = 0; i < results.length; i++) {
-        const r = results[i]
-        const file = files[i]
-        if (r.status === 'fulfilled') {
-          addImage(r.value)
-        } else {
-          const msg = r.reason instanceof Error ? r.reason.message : 'Upload failed'
-          errors.push(`${file.name}: ${msg}`)
+      try {
+        const userId = await getCurrentUserId()
+        if (!userId) {
+          throw new Error('User not authenticated')
         }
-      }
 
-      setUploadError(errors.length > 0 ? errors.join('; ') : null)
-      if (imageUploadRef.current) imageUploadRef.current.value = ''
+        const results = await Promise.allSettled(
+          files.map(async (file) => {
+            return await ImageSyncService.saveImageWithFile(userId, file)
+          }),
+        )
+
+        const errors: string[] = []
+        for (let i = 0; i < results.length; i++) {
+          const r = results[i]
+          const file = files[i]
+          if (r.status === 'fulfilled') {
+            addImage(r.value)
+          } else {
+            const msg = r.reason instanceof Error ? r.reason.message : 'Upload failed'
+            errors.push(`${file.name}: ${msg}`)
+          }
+        }
+
+        setUploadError(errors.length > 0 ? errors.join('; ') : null)
+      } catch (err) {
+        console.error('Image upload error:', err)
+        setUploadError(err instanceof Error ? err.message : 'Upload failed')
+      } finally {
+        if (imageUploadRef.current) imageUploadRef.current.value = ''
+      }
     },
     [addImage],
+  )
+
+  const handleDeleteImage = useCallback(
+    async (url: string) => {
+      try {
+        setDeleting(url)
+        setDeleteError(null)
+        setConfirmDelete(null)
+
+        const userId = await getCurrentUserId()
+        if (!userId) {
+          // Fallback to local delete if not authenticated
+          removeImage(url)
+          setDeleting(null)
+          return
+        }
+
+        // Delete image with file from Storage
+        await ImageSyncService.deleteImageWithFile(userId, url)
+
+        // Remove from store
+        removeImage(url)
+
+        setDeleting(null)
+      } catch (err) {
+        console.error('Error deleting image:', err)
+        setDeleteError(err instanceof Error ? err.message : 'Delete failed')
+        setDeleting(null)
+      }
+    },
+    [removeImage],
   )
 
   const handleAddImageUrl = useCallback(() => {
@@ -135,10 +179,11 @@ export function ImagesPage() {
                 </button>
                 <button
                   className="toolbar__image-remove"
-                  onClick={() => useStore.getState().removeImage(img)}
-                  title="Delete"
+                  onClick={() => setConfirmDelete(img)}
+                  disabled={deleting === img}
+                  title={deleting === img ? 'Deleting...' : 'Delete'}
                 >
-                  ×
+                  {deleting === img ? '...' : '×'}
                 </button>
               </div>
             </div>
@@ -163,6 +208,11 @@ export function ImagesPage() {
             {uploadError}
           </p>
         ) : null}
+        {deleteError ? (
+          <p className="toolbar__upload-error" role="alert">
+            {deleteError}
+          </p>
+        ) : null}
         <div className="toolbar__url-row">
           <input
             className="toolbar__url-input"
@@ -177,6 +227,18 @@ export function ImagesPage() {
           </button>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete !== null}
+        title="Delete Image"
+        message="Are you sure you want to delete this image? This will remove the image file from storage."
+        onConfirm={() => {
+          if (confirmDelete) {
+            handleDeleteImage(confirmDelete)
+          }
+        }}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   )
 }

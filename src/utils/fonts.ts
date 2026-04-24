@@ -149,12 +149,28 @@ export function injectUploadedFont(font: FontDef) {
     style.id = styleId
     document.head.appendChild(style)
   }
+
+  const format = getFontFormat(font.uploadUrl)
   style.textContent = `@font-face {
   font-family: '${font.family}';
-  src: url('${font.uploadUrl}');
+  src: url('${font.uploadUrl}') format('${format}');
   font-weight: ${font.weight};
   font-display: swap;
 }`
+}
+
+function getFontFormat(url: string): string {
+  if (url.endsWith('.woff2')) return 'woff2'
+  if (url.endsWith('.woff')) return 'woff'
+  if (url.endsWith('.ttf')) return 'truetype'
+  return 'woff2'
+}
+
+export function removeUploadedFont(fontId: string) {
+  const styleEl = document.getElementById(`upload-font-${fontId}`)
+  if (styleEl) {
+    styleEl.remove()
+  }
 }
 
 export async function fetchLocalFonts(): Promise<FontDef[]> {

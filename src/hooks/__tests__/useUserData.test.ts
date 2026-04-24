@@ -122,7 +122,7 @@ describe('useUserData', () => {
     vi.clearAllMocks()
 
     // Simulate logout
-    rerender({ user: null })
+    rerender({ user: null as any })
 
     // Should not fetch profile again
     expect(supabase.from).not.toHaveBeenCalled()

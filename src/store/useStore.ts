@@ -143,6 +143,12 @@ export const useStore = create<AppStore>()(
 
         // Fonts
         addFont: (font) => {
+          // Check if font already exists to avoid duplicates
+          const currentFonts = get().fonts
+          if (currentFonts.find((f) => f.id === font.id)) {
+            return
+          }
+
           set((state) => ({ fonts: [...state.fonts, font] }))
           const { fonts, textInputs, layerFontPins } = get()
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
@@ -173,10 +179,22 @@ export const useStore = create<AppStore>()(
         setUserFonts: (userFonts) => {
           // Used only for loading fonts from Supabase - does NOT trigger sync
           set((state) => {
-            // Keep default fonts, replace everything else with user fonts
+            // Database is the source of truth
+            // DEFAULT_FONTS in DB (if modified) override the constants
+            // DEFAULT_FONTS not in DB are added with their default state
             const defaultFontIds = new Set(DEFAULT_FONTS.map((f) => f.id))
-            const defaultFonts = state.fonts.filter((font) => defaultFontIds.has(font.id))
-            const fonts = [...defaultFonts, ...userFonts.filter((f) => !defaultFontIds.has(f.id))]
+            const userFontsMap = new Map(userFonts.map((f) => [f.id, f]))
+
+            // Start with DEFAULT_FONTS, but use DB version if it exists
+            const mergedDefaultFonts = DEFAULT_FONTS.map((defaultFont) => {
+              const dbVersion = userFontsMap.get(defaultFont.id)
+              return dbVersion || defaultFont
+            })
+
+            // Add non-default fonts from DB
+            const nonDefaultUserFonts = userFonts.filter((f) => !defaultFontIds.has(f.id))
+
+            const fonts = [...mergedDefaultFonts, ...nonDefaultUserFonts]
             const validFontIds = new Set(fonts.map((font) => font.id))
             const layerFontPins = Object.fromEntries(
               Object.entries(state.layerFontPins).filter(([, fontId]) => validFontIds.has(fontId)),
@@ -251,6 +269,12 @@ export const useStore = create<AppStore>()(
 
         // Images
         addImage: (url) => {
+          // Check if image already exists to avoid duplicates
+          const currentImages = get().images
+          if (currentImages.includes(url)) {
+            return
+          }
+
           set((state) => ({ images: [...state.images, url] }))
           const { fonts, textInputs, layerFontPins } = get()
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })

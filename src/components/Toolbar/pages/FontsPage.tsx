@@ -1,18 +1,38 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../../store/useStore'
-import { loadFontFile, injectUploadedFont } from '../../../utils/fonts'
+import { injectUploadedFont, removeUploadedFont } from '../../../utils/fonts'
+import { FontSyncService } from '../../../services/fontSync'
+import { getCurrentUserId } from '../../../utils/auth'
 import type { FontDef } from '../../../types'
+import { ConfirmDialog } from '../../ConfirmDialog'
 
 function useFontLoadStatus(fonts: FontDef[]): Set<string> {
   const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set())
   const fontsRef = useRef(fonts)
-  fontsRef.current = fonts
+
+  useEffect(() => {
+    fontsRef.current = fonts
+  }, [fonts])
 
   const check = useCallback(() => {
     const loaded = new Set<string>()
     for (const font of fontsRef.current) {
-      if (document.fonts.check(`${font.weight} 12px "${font.family}"`)) {
+      // For Google fonts and local fonts, always mark as loaded
+      if (font.source === 'google' || font.source === 'local') {
         loaded.add(font.id)
+        continue
+      }
+
+      // For uploaded fonts, check if the font face is actually loaded
+      if (font.source === 'upload' && font.uploadUrl) {
+        // Try multiple weight variations to be more accurate
+        const weights = [font.weight, 400, 700]
+        const isLoaded = weights.some((weight) =>
+          document.fonts.check(`${weight} 12px "${font.family}"`),
+        )
+        if (isLoaded) {
+          loaded.add(font.id)
+        }
       }
     }
     setLoadedIds((prev) => {
@@ -22,12 +42,20 @@ function useFontLoadStatus(fonts: FontDef[]): Set<string> {
   }, [])
 
   useEffect(() => {
+    // Initial check after fonts are ready
     document.fonts.ready.then(check)
+
+    // Listen for font loading events
     document.fonts.addEventListener('loadingdone', check)
     document.fonts.addEventListener('loadingerror', check)
+
+    // Also check periodically for uploaded fonts that might load async
+    const interval = setInterval(check, 2000)
+
     return () => {
       document.fonts.removeEventListener('loadingdone', check)
       document.fonts.removeEventListener('loadingerror', check)
+      clearInterval(interval)
     }
   }, [check])
 
@@ -39,7 +67,6 @@ export function FontsPage() {
     fonts,
     toggleFontActive,
     removeFont,
-    addFont,
     textInputs,
     layerFontPins,
     setLayerFontPin,
@@ -60,27 +87,98 @@ export function FontsPage() {
 
   const fontUploadRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
-  const handleFontUpload = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDeleteFont = useCallback(async (fontId: string) => {
+    try {
+      console.log('[handleDeleteFont] Starting deletion:', { fontId, fontIdType: typeof fontId })
+      
+      setDeleting(fontId)
+      setDeleteError(null)
+      setConfirmDelete(null)
+
+      const userId = await getCurrentUserId()
+      console.log('[handleDeleteFont] Got userId:', { userId, userIdType: typeof userId })
+      
+      if (!userId) {
+        // Fallback to local delete if not authenticated
+        removeFont(fontId)
+        return
+      }
+
+      // Delete font with file from Storage
+      console.log('[handleDeleteFont] Calling deleteFontWithFile with:', { userId, fontId })
+      await FontSyncService.deleteFontWithFile(userId, fontId)
+
+      // Remove from store
+      removeFont(fontId)
+
+      // Remove @font-face from DOM
+      removeUploadedFont(fontId)
+
+      setDeleting(null)
+    } catch (err) {
+      console.error('Error deleting font:', err)
+      setDeleteError(err instanceof Error ? err.message : 'Delete failed')
+      setDeleting(null)
+    }
+  }, [removeFont])
+
+  const handleFontUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || [])
       if (!files.length) return
+
       setUploading(true)
+      setUploadError(null)
+
       try {
+        const userId = await getCurrentUserId()
+        if (!userId) {
+          throw new Error('User not authenticated')
+        }
+
         for (const file of files) {
-          const fontDef = await loadFontFile(file)
-          injectUploadedFont(fontDef)
-          addFont(fontDef)
+          const fontId = `font-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+          const fontName = file.name.replace(/\.(woff2|woff|ttf)$/i, '')
+
+          const font: FontDef = {
+            id: fontId,
+            name: fontName,
+            family: fontName,
+            weight: 400,
+            source: 'upload',
+            isActive: true,
+          }
+
+          // Save font to database with file upload
+          await FontSyncService.saveFontWithFile(userId, font, file)
+
+          // Reload all fonts from database to get the uploaded font with correct URL
+          const allFonts = await FontSyncService.loadFonts(userId)
+          const uploadedFont = allFonts.find((f) => f.id === fontId)
+
+          if (uploadedFont) {
+            // Add to store without triggering sync (font is already in database)
+            const currentFonts = useStore.getState().fonts
+            if (!currentFonts.find((f) => f.id === uploadedFont.id)) {
+              useStore.setState((state) => ({ fonts: [...state.fonts, uploadedFont] }))
+            }
+            
+            // Inject font into DOM
+            injectUploadedFont(uploadedFont)
+          }
         }
       } catch (err) {
         console.error('Font upload error:', err)
+        setUploadError(err instanceof Error ? err.message : 'Upload failed')
       } finally {
         setUploading(false)
         if (fontUploadRef.current) fontUploadRef.current.value = ''
       }
-    },
-    [addFont],
-  )
+    }, [])
 
   return (
     <div className="toolbar__panel pb-0">
@@ -161,14 +259,21 @@ export function FontsPage() {
             </button>
             <button
               className="toolbar__font-remove"
-              onClick={() => removeFont(font.id)}
-              title="Remove font"
+              onClick={() => setConfirmDelete(font.id)}
+              disabled={deleting === font.id}
+              title={deleting === font.id ? 'Deleting...' : 'Remove font'}
             >
-              ×
+              {deleting === font.id ? '...' : '×'}
             </button>
           </div>
         ))}
       </div>
+      
+      {deleteError && (
+        <p className="toolbar__upload-error" role="alert">
+          {deleteError}
+        </p>
+      )}
 
       <div className="toolbar__font-upload bg-bg-toolbar sticky bottom-0 pb-4">
         <p className="toolbar__hint">
@@ -177,7 +282,7 @@ export function FontsPage() {
         <input
           ref={fontUploadRef}
           type="file"
-          accept=".woff,.woff2,.ttf,.otf"
+          accept=".woff,.woff2,.ttf"
           multiple
           style={{ display: 'none' }}
           onChange={handleFontUpload}
@@ -189,7 +294,24 @@ export function FontsPage() {
         >
           {uploading ? 'Loading…' : '+ Upload Font File'}
         </button>
+        {uploadError && (
+          <p className="toolbar__upload-error" role="alert">
+            {uploadError}
+          </p>
+        )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete !== null}
+        title="Delete Font"
+        message="Are you sure you want to delete this font? This will remove the font file from storage."
+        onConfirm={() => {
+          if (confirmDelete) {
+            handleDeleteFont(confirmDelete)
+          }
+        }}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   )
 }

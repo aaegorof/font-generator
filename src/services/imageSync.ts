@@ -36,6 +36,19 @@ export class ImageSyncService {
         return
       }
 
+      // Check if image already exists to avoid duplicates
+      const { data: existing } = await supabase
+        .from('user_images')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('url', url)
+        .maybeSingle()
+
+      if (existing) {
+        // Image already exists, skip insert
+        return
+      }
+
       const { error } = await supabase.from('user_images').insert({
         user_id: userId,
         url: url,
@@ -81,5 +94,115 @@ export class ImageSyncService {
     // Extract storage path from Supabase Storage URL
     const match = url.match(/\/storage\/v1\/object\/public\/user-images\/(.+)/)
     return match ? match[1] : null
+  }
+
+  /**
+   * Upload image file to Supabase Storage
+   */
+  static async uploadImage(
+    userId: string,
+    file: File,
+  ): Promise<{ url: string; storagePath: string }> {
+    try {
+      this.validateImageFile(file)
+
+      const imageId = `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      const fileExt = file.name.split('.').pop()
+      const storagePath = `${userId}/${imageId}.${fileExt}`
+
+      const { error } = await supabase.storage.from('user-images').upload(storagePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+
+      if (error) throw error
+
+      const { data: urlData } = supabase.storage.from('user-images').getPublicUrl(storagePath)
+
+      return {
+        url: urlData.publicUrl,
+        storagePath: storagePath,
+      }
+    } catch (err) {
+      console.error('Error uploading image:', err)
+      throw err
+    }
+  }
+
+  /**
+   * Delete image file from Storage
+   */
+  static async deleteImageFile(storagePath: string): Promise<void> {
+    try {
+      const { error } = await supabase.storage.from('user-images').remove([storagePath])
+
+      if (error) throw error
+    } catch (err) {
+      console.error('Error deleting image file:', err)
+      throw err
+    }
+  }
+
+  /**
+   * Validate image file
+   */
+  private static validateImageFile(file: File): void {
+    const maxSize = 10 * 1024 * 1024
+    if (file.size > maxSize) {
+      throw new Error('Image file too large (max 10 MB)')
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('Invalid image file type (allowed: .jpg, .jpeg, .png, .webp)')
+    }
+  }
+
+  /**
+   * Save image with file
+   */
+  static async saveImageWithFile(userId: string, file: File): Promise<string> {
+    try {
+      const { url, storagePath } = await this.uploadImage(userId, file)
+
+      const { error } = await supabase.from('user_images').insert({
+        user_id: userId,
+        url: url,
+        storage_path: storagePath,
+      })
+
+      if (error) throw error
+
+      return url
+    } catch (err) {
+      console.error('Error saving image with file:', err)
+      throw err
+    }
+  }
+
+  /**
+   * Delete image with file
+   */
+  static async deleteImageWithFile(userId: string, url: string): Promise<void> {
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('user_images')
+        .select('storage_path')
+        .eq('user_id', userId)
+        .eq('url', url)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      await this.deleteImage(userId, url)
+
+      if (data?.storage_path) {
+        await this.deleteImageFile(data.storage_path)
+      }
+    } catch (err) {
+      console.error('Error deleting image with file:', err)
+      throw err
+    }
   }
 }

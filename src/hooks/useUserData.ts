@@ -1,6 +1,10 @@
 import { useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import type { User } from '@supabase/supabase-js'
+import { FontSyncService } from '../services/fontSync'
+import { ImageSyncService } from '../services/imageSync'
+import { injectUploadedFont } from '../utils/fonts'
+import { useStore } from '../store/useStore'
 
 export function useUserData(user: User | null) {
   useEffect(() => {
@@ -69,6 +73,24 @@ export function useUserData(user: User | null) {
           // Will be implemented in Story 8.2
           console.log('User profile loaded:', profile)
         }
+
+        // Load fonts from database and replace store fonts
+        const fonts = await FontSyncService.loadFonts(userId)
+        const store = useStore.getState()
+
+        // Use setUserFonts to avoid triggering sync back to database
+        store.setUserFonts(fonts)
+
+        // Inject uploaded fonts into the DOM
+        fonts.forEach((font) => {
+          if (font.source === 'upload' && font.uploadUrl) {
+            injectUploadedFont(font)
+          }
+        })
+
+        // Load images - use setUserImages to avoid triggering sync
+        const images = await ImageSyncService.loadImages(userId)
+        store.setUserImages(images)
       } catch (err) {
         console.error('Error loading user data:', err)
       }
