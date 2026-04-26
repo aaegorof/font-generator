@@ -163,6 +163,7 @@ function getFontFormat(url: string): string {
   if (url.endsWith('.woff2')) return 'woff2'
   if (url.endsWith('.woff')) return 'woff'
   if (url.endsWith('.ttf')) return 'truetype'
+  if (url.endsWith('.otf')) return 'opentype'
   return 'woff2'
 }
 

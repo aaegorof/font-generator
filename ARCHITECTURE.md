@@ -10,7 +10,7 @@ Font Generator — это React-приложение для генерации �
 - **Стилизация**: Tailwind CSS 4.2.2 (через `@tailwindcss/vite` плагин)
 - **Управление состоянием**: Zustand 5.0.12 с persist middleware
 - **Роутинг**: React Router DOM 7.13.2
-- **Backend**: Express 5.2.1 (порт 3001) для загрузки шрифтов
+- **Backend**: Supabase (Auth, Storage, Database)
 - **Экспорт**: html-to-image 1.11.13
 
 ## Структура проекта
@@ -40,9 +40,11 @@ font-generator/
 │   │   ├── tileGenerator.ts # Генерация тайлов
 │   │   ├── exportTile.ts  # Экспорт тайлов в PNG
 │   │   └── exportSettings.ts # Импорт/экспорт настроек
+│   ├── services/          # Сервисы для работы с Supabase
+│   │   ├── fontSync.ts    # Синхронизация шрифтов
+│   │   └── imageSync.ts   # Синхронизация изображений
 │   ├── App.tsx            # Главный компонент приложения
 │   └── main.tsx           # Точка входа
-├── server.js              # Express сервер для загрузки шрифтов
 ├── vite.config.ts         # Конфигурация Vite
 └── tsconfig.json          # Конфигурация TypeScript
 ```
@@ -132,10 +134,11 @@ font-generator/
    - Функция: `injectLocalFontFaces()`
 
 3. **Загруженные шрифты**
-   - Загружаются через Express сервер (порт 3001)
-   - Сохраняются в `public/fonts/`
-   - Инжектятся через индивидуальные `<style>` теги
+   - Загружаются через Supabase Storage
+   - Сохраняются в bucket `user-fonts/{user_id}/{font_id}.{ext}`
+   - Инжектятся через индивидуальные `<style>` теги с публичными URL
    - Функция: `injectUploadedFont(font)`
+   - Сервис: `FontSyncService` (src/services/fontSync.ts)
 
 ## Генерация тайлов
 
@@ -169,15 +172,34 @@ font-generator/
 - Импортировать настройки из JSON файла
 - Восстанавливать состояние приложения
 
-## Express сервер (server.js)
+## Supabase Integration
 
-Простой Express сервер для загрузки шрифтов:
+Приложение использует Supabase для:
 
-- Порт: 3001
-- Endpoint: `POST /upload-font`
-- Использует Multer для обработки multipart/form-data
-- Сохраняет файлы в `public/fonts/`
-- Возвращает информацию о загруженном шрифте
+### Authentication
+- Google OAuth для входа пользователей
+- Session management
+- RLS (Row Level Security) policies
+
+### Storage
+- **user-fonts** bucket: Загрузка и хранение пользовательских шрифтов
+  - Путь: `user-fonts/{user_id}/{font_id}.{ext}`
+  - Поддержка форматов: `.woff2`, `.woff`, `.ttf`, `.otf`
+  - Максимальный размер: 5 MB
+
+- **user-images** bucket: Загрузка и хранение пользовательских изображений
+  - Путь: `user-images/{user_id}/{image_id}.{ext}`
+  - Поддержка форматов: `.jpg`, `.jpeg`, `.png`, `.webp`
+  - Максимальный размер: 10 MB
+
+### Database
+- `user_fonts`: Метаданные загруженных шрифтов
+- `user_images`: Метаданные загруженных изображений
+- `user_favorites`: Избранные комбинации шрифтов и изображений
+
+### Sync Services
+- `FontSyncService` (src/services/fontSync.ts): Синхронизация шрифтов между localStorage и Supabase
+- `ImageSyncService` (src/services/imageSync.ts): Синхронизация изображений между localStorage и Supabase
 
 ## Критические правила
 
@@ -212,10 +234,9 @@ font-generator/
 npm run dev
 ```
 
-Запускает два процесса:
+Запускает:
 
 - Vite dev server (порт 5173)
-- Express сервер (порт 3001)
 
 ### Сборка:
 
@@ -231,10 +252,11 @@ npm run format
 
 ## Важные замечания
 
-1. **Два процесса обязательны**: Vite и Express должны работать одновременно
+1. **Supabase required**: Для загрузки файлов требуется запущенный Supabase (локальный или облачный)
 2. **Избранное**: Сопоставление по `fontIds + imageUrl`, а не по `id` тайла
 3. **Tailwind v4**: Нет директив `@tailwind`, плагин все делает автоматически
 4. **Prettier**: Обязательно использовать (no semicolons, single quotes, 2 spaces)
+5. **localStorage vs Supabase**: Неавторизованные пользователи используют только localStorage; авторизованные — синхронизацию с Supabase
 
 ## Дополнительная информация
 

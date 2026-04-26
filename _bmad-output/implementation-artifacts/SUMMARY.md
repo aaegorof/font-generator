@@ -2,10 +2,11 @@
 
 ## Статистика
 
-- **Всего стори создано:** 13
+- **Всего стори создано:** 19
 - **Epic 7 (Authentication Integration):** 4 стори
 - **Epic 8 (Data Synchronization):** 5 стори
 - **Epic 9 (File Storage Migration):** 4 стори
+- **Epic 10 (Google Fonts Library):** 6 стори
 
 ## Epic 7: Authentication Integration
 
@@ -41,6 +42,19 @@
 
 **Цель:** Миграция файлового хранилища на Supabase Storage
 
+## Epic 10: Google Fonts Library Integration
+
+| Story | Название                                  | Зависимости |
+| ----- | ----------------------------------------- | ----------- |
+| 10.1  | Google Fonts API Service                  | None        |
+| 10.2  | Font Library Data Model                   | 10.1        |
+| 10.3  | Font Picker Modal UI                      | 10.1, 10.2  |
+| 10.4  | Dynamic Font Loading for Library Fonts    | 10.2        |
+| 10.5  | Supabase Integration for Library Fonts    | 8.3, 10.2   |
+| 10.6  | Integrate Font Library Modal into FontsPage | 10.3, 10.4, 10.5 |
+
+**Цель:** Интеграция с Google Fonts API для доступа к 1000+ шрифтам
+
 ## Ключевые файлы
 
 ### Новые компоненты
@@ -52,7 +66,9 @@
 - `src/services/fontSync.ts` — Font service
 - `src/services/imageSync.ts` — Image service
 - `src/services/favoriteSync.ts` — Favorite service
+- `src/services/googleFontsApi.ts` — Google Fonts API service (Epic 10)
 - `src/components/Auth/AuthButton.tsx` — Auth button
+- `src/components/FontLibraryModal/index.tsx` — Font library picker (Epic 10)
 - `src/lib/supabase.ts` — Supabase client
 
 ### Обновляемые файлы
@@ -73,6 +89,7 @@
 1. **Epic 7** (Authentication) — последовательно 7.1 → 7.2 → 7.3 → 7.4
 2. **Epic 8** (Data Sync) — 8.1 → 8.2 → (8.3, 8.4, 8.5 параллельно)
 3. **Epic 9** (File Storage) — (9.1, 9.2 параллельно) → 9.3 → 9.4
+4. **Epic 10** (Google Fonts Library) — 10.1 → 10.2 → (10.3, 10.4 параллельно) → 10.5 → 10.6
 
 ## Технические детали
 
@@ -96,13 +113,16 @@
 
 ## Следующие шаги
 
-1. Начать с Epic 7, Story 7.1
-2. Следовать dependency graph
-3. Тестировать каждую story перед переходом к следующей
-4. Обновлять документацию по мере реализации
+1. Epic 7, 8, 9 — завершены
+2. **Epic 10 (Google Fonts Library)** — готов к реализации
+3. Начать с Story 10.1 (Google Fonts API Service)
+4. Следовать dependency graph
+5. Тестировать каждую story перед переходом к следующей
+6. Обновлять документацию по мере реализации
 
 ---
 
 **Дата создания:** 2026-04-08  
+**Последнее обновление:** 2026-04-27  
 **Автор:** John (Product Manager)  
-**Статус:** Все стори готовы к разработке
+**Статус:** Epic 10 добавлен и готов к разработке

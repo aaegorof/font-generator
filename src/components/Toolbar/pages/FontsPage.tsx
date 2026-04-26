@@ -63,14 +63,8 @@ function useFontLoadStatus(fonts: FontDef[]): Set<string> {
 }
 
 export function FontsPage() {
-  const {
-    fonts,
-    toggleFontActive,
-    removeFont,
-    textInputs,
-    layerFontPins,
-    setLayerFontPin,
-  } = useStore()
+  const { fonts, toggleFontActive, removeFont, textInputs, layerFontPins, setLayerFontPin } =
+    useStore()
   const loadedFontIds = useFontLoadStatus(fonts)
   const activeFonts = useMemo(() => fonts.filter((f) => f.isActive !== false), [fonts])
 
@@ -92,93 +86,96 @@ export function FontsPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
-  const handleDeleteFont = useCallback(async (fontId: string) => {
-    try {
-      console.log('[handleDeleteFont] Starting deletion:', { fontId, fontIdType: typeof fontId })
-      
-      setDeleting(fontId)
-      setDeleteError(null)
-      setConfirmDelete(null)
+  const handleDeleteFont = useCallback(
+    async (fontId: string) => {
+      try {
+        console.log('[handleDeleteFont] Starting deletion:', { fontId, fontIdType: typeof fontId })
 
-      const userId = await getCurrentUserId()
-      console.log('[handleDeleteFont] Got userId:', { userId, userIdType: typeof userId })
-      
-      if (!userId) {
-        // Fallback to local delete if not authenticated
+        setDeleting(fontId)
+        setDeleteError(null)
+        setConfirmDelete(null)
+
+        const userId = await getCurrentUserId()
+        console.log('[handleDeleteFont] Got userId:', { userId, userIdType: typeof userId })
+
+        if (!userId) {
+          // Fallback to local delete if not authenticated
+          removeFont(fontId)
+          return
+        }
+
+        // Delete font with file from Storage
+        console.log('[handleDeleteFont] Calling deleteFontWithFile with:', { userId, fontId })
+        await FontSyncService.deleteFontWithFile(userId, fontId)
+
+        // Remove from store
         removeFont(fontId)
-        return
+
+        // Remove @font-face from DOM
+        removeUploadedFont(fontId)
+
+        setDeleting(null)
+      } catch (err) {
+        console.error('Error deleting font:', err)
+        setDeleteError(err instanceof Error ? err.message : 'Delete failed')
+        setDeleting(null)
       }
-
-      // Delete font with file from Storage
-      console.log('[handleDeleteFont] Calling deleteFontWithFile with:', { userId, fontId })
-      await FontSyncService.deleteFontWithFile(userId, fontId)
-
-      // Remove from store
-      removeFont(fontId)
-
-      // Remove @font-face from DOM
-      removeUploadedFont(fontId)
-
-      setDeleting(null)
-    } catch (err) {
-      console.error('Error deleting font:', err)
-      setDeleteError(err instanceof Error ? err.message : 'Delete failed')
-      setDeleting(null)
-    }
-  }, [removeFont])
+    },
+    [removeFont],
+  )
 
   const handleFontUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || [])
-      if (!files.length) return
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
 
-      setUploading(true)
-      setUploadError(null)
+    setUploading(true)
+    setUploadError(null)
 
-      try {
-        const userId = await getCurrentUserId()
-        if (!userId) {
-          throw new Error('User not authenticated')
-        }
-
-        for (const file of files) {
-          const fontId = `font-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-          const fontName = file.name.replace(/\.(woff2|woff|ttf)$/i, '')
-
-          const font: FontDef = {
-            id: fontId,
-            name: fontName,
-            family: fontName,
-            weight: 400,
-            source: 'upload',
-            isActive: true,
-          }
-
-          // Save font to database with file upload
-          await FontSyncService.saveFontWithFile(userId, font, file)
-
-          // Reload all fonts from database to get the uploaded font with correct URL
-          const allFonts = await FontSyncService.loadFonts(userId)
-          const uploadedFont = allFonts.find((f) => f.id === fontId)
-
-          if (uploadedFont) {
-            // Add to store without triggering sync (font is already in database)
-            const currentFonts = useStore.getState().fonts
-            if (!currentFonts.find((f) => f.id === uploadedFont.id)) {
-              useStore.setState((state) => ({ fonts: [...state.fonts, uploadedFont] }))
-            }
-            
-            // Inject font into DOM
-            injectUploadedFont(uploadedFont)
-          }
-        }
-      } catch (err) {
-        console.error('Font upload error:', err)
-        setUploadError(err instanceof Error ? err.message : 'Upload failed')
-      } finally {
-        setUploading(false)
-        if (fontUploadRef.current) fontUploadRef.current.value = ''
+    try {
+      const userId = await getCurrentUserId()
+      if (!userId) {
+        throw new Error('User not authenticated')
       }
-    }, [])
+
+      for (const file of files) {
+        const fontId = `font-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        const fontName = file.name.replace(/\.(woff2|woff|ttf)$/i, '')
+
+        const font: FontDef = {
+          id: fontId,
+          name: fontName,
+          family: fontName,
+          weight: 400,
+          source: 'upload',
+          isActive: true,
+        }
+
+        // Save font to database with file upload
+        await FontSyncService.saveFontWithFile(userId, font, file)
+
+        // Reload all fonts from database to get the uploaded font with correct URL
+        const allFonts = await FontSyncService.loadFonts(userId)
+        const uploadedFont = allFonts.find((f) => f.id === fontId)
+
+        if (uploadedFont) {
+          // Add to store without triggering sync (font is already in database)
+          const currentFonts = useStore.getState().fonts
+          if (!currentFonts.find((f) => f.id === uploadedFont.id)) {
+            useStore.setState((state) => ({ fonts: [...state.fonts, uploadedFont] }))
+          }
+
+          // Inject font into DOM
+          injectUploadedFont(uploadedFont)
+        }
+      }
+    } catch (err) {
+      console.error('Font upload error:', err)
+      setUploadError(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setUploading(false)
+      if (fontUploadRef.current) fontUploadRef.current.value = ''
+    }
+  }, [])
 
   return (
     <div className="toolbar__panel pb-0">
@@ -268,7 +265,7 @@ export function FontsPage() {
           </div>
         ))}
       </div>
-      
+
       {deleteError && (
         <p className="toolbar__upload-error" role="alert">
           {deleteError}
@@ -276,13 +273,10 @@ export function FontsPage() {
       )}
 
       <div className="toolbar__font-upload bg-bg-toolbar sticky bottom-0 pb-4">
-        <p className="toolbar__hint">
-          Drop your font files into <code>public/fonts/</code> folder to auto-activate custom fonts.
-        </p>
         <input
           ref={fontUploadRef}
           type="file"
-          accept=".woff,.woff2,.ttf"
+          accept=".woff,.woff2,.ttf,.otf"
           multiple
           style={{ display: 'none' }}
           onChange={handleFontUpload}

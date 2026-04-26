@@ -41,8 +41,6 @@ src/
 │   ├── Tile/                  # Individual tile component
 │   └── Toolbar/               # Settings panel
 └── App.tsx                    # Entry point, font setup
-
-server.js                      # Express server for font uploads (port 3001)
 ```
 
 ## Common Tasks
@@ -69,8 +67,8 @@ addSomething: (item) => {
 ### Adding a Font Source
 
 - **Google**: Add to `GOOGLE_FONTS` in `utils/fonts.ts`
-- **Local**: Add to `localFontFileNames` + place files in `public/fonts/`
-- **Upload**: Already handled by Express server
+- **Local**: Deprecated (use Supabase Storage instead)
+- **Upload**: Handled by `FontSyncService` → uploads to Supabase Storage
 
 ### Adding a Type
 
@@ -116,11 +114,14 @@ import type { MyType } from '@/types' // ⚠️ Always use 'import type'
 ## Development
 
 ```bash
-# Start dev (runs Vite + Express)
+# Start dev (Vite only)
 npm run dev
 
+# Or start Vite + Supabase together
+npm run dev:full
+
 # Vite: http://localhost:5173
-# Express: http://localhost:3001
+# Supabase Studio: http://127.0.0.1:54323
 
 # Build
 npm run build
@@ -133,9 +134,10 @@ npm run format
 
 ### Fonts not loading?
 
-- Check both processes are running (`npm run dev` starts both)
-- Verify font files exist in `public/fonts/`
-- Check browser console for 404s
+- Check if Supabase is running (`npm run supabase:status`)
+- Verify you're authenticated (sign in to upload fonts)
+- Check browser console for errors
+- For uploaded fonts, check Supabase Storage bucket `user-fonts`
 
 ### TypeScript errors?
 

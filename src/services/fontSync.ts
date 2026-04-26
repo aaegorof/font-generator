@@ -221,11 +221,11 @@ export class FontSyncService {
       throw new Error('Font file too large (max 5 MB)')
     }
 
-    const allowedExtensions = ['woff2', 'woff', 'ttf']
+    const allowedExtensions = ['woff2', 'woff', 'ttf', 'otf']
     const fileExt = file.name.split('.').pop()?.toLowerCase()
 
     if (!fileExt || !allowedExtensions.includes(fileExt)) {
-      throw new Error('Invalid font file type (allowed: .woff2, .woff, .ttf)')
+      throw new Error('Invalid font file type (allowed: .woff2, .woff, .ttf, .otf)')
     }
   }
 

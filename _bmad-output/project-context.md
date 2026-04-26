@@ -33,9 +33,9 @@ _Critical rules and patterns that AI agents must follow when implementing code i
 - **Tailwind CSS** 4.2.2 — via `@tailwindcss/vite` plugin (NOT PostCSS, no `tailwind.config.js`)
 - **Zustand** 5.0.12 — with `persist` middleware and `createJSONStorage`
 - **React Router DOM** 7.13.2
+- **Supabase** 2.102.1 — Auth, Storage, Database
 - **html-to-image** 1.11.13
-- **Express** 5.2.1 + **Multer** 2.1.1 — upload server, port 3001
-- Dev runner: `concurrently` — Vite dev server (5173) + Node server (3001)
+- Dev runner: `concurrently` — optional for running Supabase + Vite together
 
 ---
 
@@ -74,10 +74,8 @@ _Critical rules and patterns that AI agents must follow when implementing code i
 Three font sources — each requires its own injection mechanism:
 
 1. **Google Fonts** — `setupGoogleFonts()` injects a `<link>` tag (idempotent via id check). Add new fonts to `GOOGLE_FONTS` array in `src/utils/fonts.ts` — this is the single source of truth for Google Fonts.
-2. **Local fonts** — `injectLocalFontFaces()` injects `@font-face` rules for files in `public/fonts/`. Add filename (without extension) to `localFontFileNames`. Files must exist as `.woff2`, `.woff`, and `.ttf`.
-3. **Uploaded fonts** — `injectUploadedFont(font)` injects per-font `<style>` tags. Files are saved to `public/fonts/` via Express on port 3001. Re-injected on app load via `importAllSettings`.
-
-Vite proxies `/upload-font` → `http://localhost:3001` in dev. Production requires a real server for this route.
+2. **Local fonts** — `injectLocalFontFaces()` injects `@font-face` rules for files in `public/fonts/`. **Note**: Local font scanning via `/list-fonts` endpoint is deprecated. Fonts are now uploaded to Supabase Storage.
+3. **Uploaded fonts** — `injectUploadedFont(font)` injects per-font `<style>` tags with public URLs from Supabase Storage. Files are stored in `user-fonts/{user_id}/{font_id}.{ext}` bucket. Upload handled by `FontSyncService` (src/services/fontSync.ts).
 
 ### Code Quality & Style
 
@@ -155,7 +153,7 @@ Epic 2 - Name
 - **Never add `loadWeights` to `FontDef`** — it exists only in `GoogleFontEntry` and is used exclusively to build the Google Fonts CSS URL
 - **Local font filenames with spaces** — `injectLocalFontFaces` uses `localFile` as the path; `'Portico Regular'` maps to `/fonts/Portico Regular.woff2` — names must match exactly
 - **Tailwind v4** — no `@tailwind base/components/utilities` directives; the vite plugin handles injection automatically
-- **Two processes required in dev** — `npm run dev` starts both; font upload will silently fail if `server.js` is not running
+- **Supabase required for file uploads** — authenticated users upload files to Supabase Storage; unauthenticated users work with localStorage only
 - **Favorite matching is by fontIds + imageUrl** — not by tile id; this is intentional for deduplication logic in `Tile`
 
 ---

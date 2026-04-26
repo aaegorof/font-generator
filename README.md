@@ -21,12 +21,12 @@ cp .env.example .env.local
 # Check if environment is ready
 npm run check
 
-# 🚀 Run everything (Supabase + Frontend + Server) - ONE COMMAND
+# 🚀 Run everything (Supabase + Frontend) - ONE COMMAND
 npm run dev:full
 
 # Or run separately:
 npm run supabase:start    # Start Supabase (Studio at http://127.0.0.1:54323)
-npm run dev              # Start Vite + Express server
+npm run dev              # Start Vite dev server
 
 # Build for production
 npm run build
@@ -61,14 +61,12 @@ This starts:
 
 - **Supabase** (Postgres, Auth, Storage, Studio UI)
 - **Vite dev server** (Frontend at http://localhost:5173)
-- **Express server** (Backend at http://localhost:3000)
 
 ### Access Points
 
 Once running, you can access:
 
 - **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3000
 - **Supabase Studio**: http://127.0.0.1:54323
 - **Postgres DB**: postgresql://postgres:postgres@127.0.0.1:54322/postgres
 
@@ -80,7 +78,7 @@ If you prefer to run services individually:
 # Terminal 1: Start Supabase
 npm run supabase:start
 
-# Terminal 2: Start Frontend + Backend
+# Terminal 2: Start Frontend
 npm run dev
 
 # Check Supabase status
@@ -120,7 +118,7 @@ npm run supabase:stop
 - React 19.2.4 + TypeScript 5.9.3 + Vite 8.0.1
 - Zustand 5.0.12 (state management)
 - Tailwind CSS 4.2.2 (styling)
-- Express 5.2.1 (font upload server)
+- Supabase (Auth, Storage, Database)
 - html-to-image 1.11.13 (tile export)
 
 ## Project Structure
