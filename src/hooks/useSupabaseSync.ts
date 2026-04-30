@@ -7,7 +7,11 @@ import { validateUserProfile } from '../utils/validation'
 import { FontSyncService } from '../services/fontSync'
 import { ImageSyncService } from '../services/imageSync'
 import { FavoriteSyncService } from '../services/favoriteSync'
-import { injectUploadedFont } from '../utils/fonts'
+import {
+  injectUploadedFont,
+  setupGoogleFonts,
+  collectActiveGoogleFontsUsedInTiles,
+} from '../utils/fonts'
 
 export interface UseSupabaseSyncReturn {
   syncing: boolean
@@ -165,33 +169,15 @@ export function useSupabaseSync(userId: string | null): UseSupabaseSyncReturn {
         // Clear existing text inputs
         const currentInputs = [...store.textInputs]
         currentInputs.forEach((input) => {
-          if (store.textInputs.length > 1) {
-            store.removeTextInput(input.id)
-          }
+          store.removeTextInput(input.id)
         })
 
         // Add loaded text inputs
         const loadedInputs = data.text_inputs as unknown as TextInput[]
         if (loadedInputs.length > 0) {
-          // Remove the last remaining default input if we have data to load
-          if (store.textInputs.length === 1) {
-            store.removeTextInput(store.textInputs[0].id)
-          }
-
           // Add all loaded inputs
           loadedInputs.forEach((input) => {
-            const newInput = store.textInputs[store.textInputs.length - 1]
-            store.updateTextInput(newInput.id, {
-              text: input.text,
-              fontSize: input.fontSize,
-              letterSpacing: input.letterSpacing,
-              lineHeight: input.lineHeight,
-              textColor: input.textColor,
-              textShadow: input.textShadow,
-              textWrap: input.textWrap,
-              alignment: input.alignment,
-              verticalAlignment: input.verticalAlignment,
-            })
+            store.addTextInput(input)
           })
         }
       }
@@ -252,6 +238,10 @@ export function useSupabaseSync(userId: string | null): UseSupabaseSyncReturn {
         // Update store with user fonts (this will merge with DEFAULT_FONTS automatically)
         // Using setUserFonts to avoid triggering sync back to Supabase
         store.setUserFonts(userFonts)
+
+        const afterFonts = useStore.getState().fonts
+        const afterTiles = useStore.getState().tiles
+        setupGoogleFonts(collectActiveGoogleFontsUsedInTiles(afterFonts, afterTiles))
       } catch (fontErr) {
         console.error('Error loading fonts:', fontErr)
         // Don't throw - continue with profile load even if fonts fail

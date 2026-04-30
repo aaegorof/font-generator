@@ -9,50 +9,42 @@ import { useAuthCallback } from './hooks/useAuthCallback'
 import { useUserData } from './hooks/useUserData'
 import { useSupabaseSync } from './hooks/useSupabaseSync'
 import {
-  fetchLocalFonts,
   setupGoogleFonts,
+  collectActiveGoogleFontsUsedInTiles,
   injectLocalFontFaces,
   injectUploadedFont,
 } from './utils/fonts'
-import { fetchLocalImages } from './utils/images'
 import './App.css'
 
 export default function App() {
-  const { fonts } = useStore()
+  const { fonts, tiles } = useStore()
   const { user, loading } = useAuth()
   const { processing, error: callbackError } = useAuthCallback()
   useUserData(user)
   useSupabaseSync(user?.id ?? null)
 
   useEffect(() => {
-    // Set up fonts
-    setupGoogleFonts()
-    fetchLocalFonts().then((localFonts) => {
-      useStore.getState().setLocalFonts(localFonts)
-    })
-    fetchLocalImages().then((localImages) => {
-      useStore.getState().setLocalImages(localImages)
-    })
-
-    const { fonts: currentFonts, generateTiles, tiles } = useStore.getState()
+    const { fonts: currentFonts, generateTiles, tiles: currentTiles } = useStore.getState()
     injectLocalFontFaces(currentFonts)
 
-    // Inject uploaded fonts
     currentFonts
       .filter((f) => f.source === 'upload' && f.uploadUrl)
       .forEach((f) => injectUploadedFont(f))
 
-    // Generate initial tiles if none exist
-    if (tiles.length === 0) {
+    if (currentTiles.length === 0) {
       generateTiles()
     }
   }, [])
 
-  // Re-inject font faces when fonts list changes
   useEffect(() => {
     injectLocalFontFaces(fonts)
     fonts.filter((f) => f.source === 'upload' && f.uploadUrl).forEach((f) => injectUploadedFont(f))
   }, [fonts])
+
+  useEffect(() => {
+    const { fonts: f, tiles: t } = useStore.getState()
+    setupGoogleFonts(collectActiveGoogleFontsUsedInTiles(f, t))
+  }, [fonts, tiles])
 
   if (loading || processing) {
     return <div className="flex h-screen items-center justify-center">Loading...</div>

@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import type { FontDef, TileData, Settings, FavoriteItem, TextInput } from '../types'
 import type { SettingsExport } from '../utils/exportSettings'
 import { DEFAULT_FONTS, injectUploadedFont } from '../utils/fonts'
-import { DEFAULT_IMAGES, isScannedLocalImage } from '../utils/images'
+import { DEFAULT_IMAGES } from '../utils/images'
 import { generateAllTiles, randomizeTiles } from '../utils/tileGenerator'
 import { FontSyncService } from '../services/fontSync'
 import { ImageSyncService } from '../services/imageSync'
@@ -53,19 +53,17 @@ interface AppState {
 interface AppActions {
   updateSettings: (partial: Partial<Settings>) => void
 
-  addTextInput: () => void
+  addTextInput: (input?: TextInput) => void
   removeTextInput: (id: string) => void
   updateTextInput: (id: string, partial: Partial<Omit<TextInput, 'id'>>) => void
 
-  addFont: (font: FontDef) => void
-  setLocalFonts: (fonts: FontDef[]) => void
+  addFont: (font: FontDef) => Promise<void>
   setUserFonts: (fonts: FontDef[]) => void
   removeFont: (id: string) => void
   toggleFontActive: (id: string) => void
   setLayerFontPin: (layerIndex: number, fontId: string | null) => void
 
   addImage: (url: string) => void
-  setLocalImages: (images: string[]) => void
   setUserImages: (images: string[]) => void
   removeImage: (url: string) => void
   toggleImageDisabled: (url: string) => void
@@ -116,20 +114,14 @@ export const useStore = create<AppStore>()(
           set((state) => ({ settings: { ...state.settings, ...partial } })),
 
         // Text Inputs
-        addTextInput: () => {
-          const newInput: TextInput = {
-            id: `input-${Date.now()}`,
-            text: 'Text',
-            ...DEFAULT_TEXT_INPUT_STYLE,
-            verticalAlignment: 'center',
-          }
+        addTextInput: (input) => {
+          const newInput = input ?? DEFAULT_TEXT_INPUTS[0]
           set((state) => ({ textInputs: [...state.textInputs, newInput] }))
           const { fonts, textInputs, layerFontPins } = get()
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
         },
         removeTextInput: (id) => {
           set((state) => {
-            if (state.textInputs.length <= 1) return state
             return { textInputs: state.textInputs.filter((t) => t.id !== id) }
           })
           const { fonts, textInputs, layerFontPins } = get()
@@ -146,7 +138,7 @@ export const useStore = create<AppStore>()(
           // Check if font already exists to avoid duplicates
           const currentFonts = get().fonts
           if (currentFonts.find((f) => f.id === font.id)) {
-            return
+            return Promise.resolve()
           }
 
           set((state) => ({ fonts: [...state.fonts, font] }))
@@ -154,28 +146,18 @@ export const useStore = create<AppStore>()(
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
 
           // Sync to Supabase if user is logged in
-          getCurrentUserId()
+          return getCurrentUserId()
             .then((userId) => {
               if (userId) {
                 return FontSyncService.saveFont(userId, font)
               }
             })
-            .catch(console.error)
+            .catch((err) => {
+              console.error(err)
+              throw err
+            })
         },
-        setLocalFonts: (localFonts) => {
-          set((state) => {
-            const nonLocalFonts = state.fonts.filter((font) => font.source !== 'local')
-            const fonts = [...nonLocalFonts, ...localFonts]
-            const validFontIds = new Set(fonts.map((font) => font.id))
-            const layerFontPins = Object.fromEntries(
-              Object.entries(state.layerFontPins).filter(([, fontId]) => validFontIds.has(fontId)),
-            )
-
-            return { fonts, layerFontPins }
-          })
-          const { fonts, textInputs, layerFontPins } = get()
-          set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
-        },
+       
         setUserFonts: (userFonts) => {
           // Used only for loading fonts from Supabase - does NOT trigger sync
           set((state) => {
@@ -289,17 +271,7 @@ export const useStore = create<AppStore>()(
             })
             .catch(console.error)
         },
-        setLocalImages: (localImages) => {
-          set((state) => {
-            const nonLocalImages = state.images.filter((img) => !isScannedLocalImage(img))
-            const images = [...nonLocalImages, ...localImages]
-            const imagesSet = new Set(images)
-            const disabledImages = state.disabledImages.filter((img) => imagesSet.has(img))
-            return { images, disabledImages }
-          })
-          const { fonts, textInputs, layerFontPins } = get()
-          set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
-        },
+        
         setUserImages: (userImages) => {
           // Used only for loading images from Supabase - does NOT trigger sync
           set((state) => {

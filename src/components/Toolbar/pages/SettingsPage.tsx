@@ -40,7 +40,7 @@ export function SettingsPage() {
         <span className="toolbar__label" style={{ marginBottom: 0 }}>
           Text Layers
         </span>
-        <button className="toolbar__add-input-btn" onClick={addTextInput}>
+        <button className="toolbar__add-input-btn" onClick={() => addTextInput()}>
           <PlusIcon />
           Add layer
         </button>

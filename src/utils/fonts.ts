@@ -1,4 +1,8 @@
-import type { FontDef } from '../types'
+import type { FontDef, TileData } from '../types'
+
+// ─── Constants ──────────────────────────────────────────────────────────────
+
+export const FONT_PREVIEW_TEXT = 'The quick brown fox'
 
 // ─── Google Fonts config ────────────────────────────────────────────────────
 // Single source of truth: drives both the FontDef list and the API URL.
@@ -86,30 +90,224 @@ const GOOGLE_FONT_DEFS: FontDef[] = GOOGLE_FONTS.map(({ id, name, family, weight
   isActive: isActive ?? true,
 }))
 
-function buildGoogleFontsUrl(fonts: GoogleFontEntry[]): string {
-  const params = fonts
-    .map(({ family, loadWeights }) => {
-      const encoded = family.replace(/ /g, '+')
-      const sorted = [...loadWeights].sort((a, b) => a - b)
-      return sorted.length === 1
-        ? `family=${encoded}`
-        : `family=${encoded}:wght@${sorted.join(';')}`
-    })
-    .join('&')
-  return `https://fonts.googleapis.com/css2?${params}&display=swap`
+export const DEFAULT_FONTS: FontDef[] = [...GOOGLE_FONT_DEFS]
+
+/** Google Fonts with source `google` that are active and referenced by at least one tile. */
+export function collectActiveGoogleFontsUsedInTiles(fonts: FontDef[], tiles: TileData[]): FontDef[] {
+  const usedIds = new Set<string>()
+  for (const tile of tiles) {
+    for (const id of tile.fontIds) {
+      usedIds.add(id)
+    }
+  }
+  return fonts.filter(
+    (f) => f.source === 'google' && f.isActive !== false && usedIds.has(f.id),
+  )
 }
 
-export const DEFAULT_FONTS: FontDef[] = [...GOOGLE_FONT_DEFS]
+function encodeGoogleFontFamily(family: string): string {
+  return family.trim().replace(/\s+/g, '+')
+}
+
+function normalizeFontWeight(weight: FontDef['weight']): number | null {
+  const n = typeof weight === 'string' ? parseInt(weight, 10) : weight
+  if (typeof n !== 'number' || !Number.isFinite(n)) return null
+  if (n < 100 || n > 900) return null
+  return n
+}
+
+/**
+ * Builds a Google Fonts CSS API v2 URL for the given library fonts (grouped by family).
+ * Handles italic via ital,wght axis when needed.
+ */
+export function buildGoogleFontsLibraryCssUrl(libraryFonts: FontDef[]): string {
+  if (libraryFonts.length === 0) return ''
+
+  const byFamily = new Map<string, { weight: number; italic: boolean }[]>()
+
+  for (const font of libraryFonts) {
+    const weight = normalizeFontWeight(font.weight)
+    if (weight === null) continue
+    const italic = font.style === 'italic'
+    const list = byFamily.get(font.family) ?? []
+    list.push({ weight, italic })
+    byFamily.set(font.family, list)
+  }
+
+  const params: string[] = []
+
+  for (const [family, rawPairs] of byFamily) {
+    const seen = new Set<string>()
+    const pairs: { weight: number; italic: boolean }[] = []
+    for (const p of rawPairs) {
+      const key = `${p.italic ? 1 : 0}:${p.weight}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      pairs.push(p)
+    }
+    if (pairs.length === 0) continue
+
+    const encoded = encodeGoogleFontFamily(family)
+    const allNormal = pairs.every((p) => !p.italic)
+    const allItalic = pairs.every((p) => p.italic)
+
+    let spec: string
+    if (allNormal) {
+      const weights = [...new Set(pairs.map((p) => p.weight))].sort((a, b) => a - b)
+      spec = `family=${encoded}:wght@${weights.join(';')}`
+    } else if (allItalic) {
+      const specs = [...new Set(pairs.map((p) => `1,${p.weight}`))]
+        .sort()
+        .join(';')
+      spec = `family=${encoded}:ital,wght@${specs}`
+    } else {
+      const specs = [...new Set(pairs.map((p) => `${p.italic ? 1 : 0},${p.weight}`))]
+        .sort()
+        .join(';')
+      spec = `family=${encoded}:ital,wght@${specs}`
+    }
+    params.push(spec)
+  }
+
+  if (params.length === 0) return ''
+
+  return `https://fonts.googleapis.com/css2?${params.join('&')}&display=swap`
+}
+
+// ─── Google Fonts Library Types & Utilities ─────────────────────────────────
+
+export interface GoogleFontVariant {
+  family: string
+  variant: string
+  weight: number
+  style: string
+}
+
+/**
+ * Converts Google Fonts API variant strings to FontDef objects.
+ * 
+ * @param family - Font family name (e.g., "Roboto")
+ * @param variants - Array of variant strings from API (e.g., ["regular", "700", "italic", "700italic"])
+ * @returns Array of FontDef objects, one per variant. Returns empty array if inputs are invalid.
+ * 
+ * Variant parsing rules:
+ * - "regular" → weight 400, style normal
+ * - "italic" → weight 400, style italic
+ * - "700" → weight 700, style normal
+ * - "700italic" → weight 700, style italic
+ * 
+ * Malformed or unrecognized variants are skipped with a console warning.
+ */
+export function parseGoogleFontVariants(family: string, variants: string[]): FontDef[] {
+  if (!family || typeof family !== 'string' || family.trim() === '') {
+    console.warn('parseGoogleFontVariants: invalid family name', family)
+    return []
+  }
+  
+  if (!Array.isArray(variants) || variants.length === 0) {
+    console.warn('parseGoogleFontVariants: invalid or empty variants array', variants)
+    return []
+  }
+  
+  const results: FontDef[] = []
+  
+  for (const variant of variants) {
+    if (typeof variant !== 'string' || variant.trim() === '') {
+      continue
+    }
+    
+    const parsed = parseVariant(variant)
+    if (!parsed) {
+      console.warn(`parseGoogleFontVariants: skipping invalid variant "${variant}" for ${family}`)
+      continue
+    }
+    
+    const { weight, style } = parsed
+    const slug = sanitizeSlug(family)
+    const id = `google-${slug}-${weight}-${style}`
+    
+    results.push({
+      id,
+      name: `${family} ${getWeightName(weight)} ${weight}`,
+      family,
+      weight,
+      style,
+      source: 'google',
+      isActive: true,
+    })
+  }
+  
+  return results
+}
+
+function parseVariant(variant: string): { weight: number; style: string } | null {
+  if (variant === 'regular') {
+    return { weight: 400, style: 'normal' }
+  }
+  if (variant === 'italic') {
+    return { weight: 400, style: 'italic' }
+  }
+  if (variant.endsWith('italic')) {
+    const weightStr = variant.replace('italic', '')
+    const weight = parseInt(weightStr, 10)
+    if (isNaN(weight) || !isValidFontWeight(weight)) {
+      return null
+    }
+    return { weight, style: 'italic' }
+  }
+  const weight = parseInt(variant, 10)
+  if (isNaN(weight) || !isValidFontWeight(weight)) {
+    return null
+  }
+  return { weight, style: 'normal' }
+}
+
+function isValidFontWeight(weight: number): boolean {
+  return weight >= 100 && weight <= 900
+}
+
+function sanitizeSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function getWeightName(weight: number): string {
+  const weightNames: Record<number, string> = {
+    100: 'Thin',
+    200: 'Extra Light',
+    300: 'Light',
+    400: 'Regular',
+    500: 'Medium',
+    600: 'Semi Bold',
+    700: 'Bold',
+    800: 'Extra Bold',
+    900: 'Black',
+  }
+  return weightNames[weight] || 'Regular'
+}
 
 // ─── Setup ───────────────────────────────────────────────────────────────────
 
-export function setupGoogleFonts() {
-  const id = 'google-fonts-link'
-  if (document.getElementById(id)) return
+const LEGACY_GOOGLE_FONTS_LINK_ID = 'google-fonts-link'
+const GOOGLE_FONTS_LIBRARY_LINK_ID = 'google-fonts-library-link'
+
+export function setupGoogleFonts(libraryFonts: FontDef[]) {
+  const legacy = document.getElementById(LEGACY_GOOGLE_FONTS_LINK_ID)
+  if (legacy) legacy.remove()
+
+  const existing = document.getElementById(GOOGLE_FONTS_LIBRARY_LINK_ID)
+  if (existing) existing.remove()
+
+  const href = buildGoogleFontsLibraryCssUrl(libraryFonts)
+  if (!href) return
+
   const link = document.createElement('link')
-  link.id = id
+  link.id = GOOGLE_FONTS_LIBRARY_LINK_ID
   link.rel = 'stylesheet'
-  link.href = buildGoogleFontsUrl(GOOGLE_FONTS)
+  link.href = href
   document.head.appendChild(link)
 }
 
@@ -171,55 +369,5 @@ export function removeUploadedFont(fontId: string) {
   const styleEl = document.getElementById(`upload-font-${fontId}`)
   if (styleEl) {
     styleEl.remove()
-  }
-}
-
-export async function fetchLocalFonts(): Promise<FontDef[]> {
-  try {
-    const res = await fetch('/list-fonts')
-    if (!res.ok) {
-      throw new Error(`Failed to fetch local fonts: ${res.status}`)
-    }
-
-    const stems = (await res.json()) as string[]
-    return stems.map((stem) => ({
-      id: stem.toLowerCase().replace(/ /g, '-'),
-      name: stem,
-      family: stem,
-      weight: 400,
-      source: 'local',
-      localFile: stem,
-      isActive: true,
-    }))
-  } catch (error) {
-    console.warn('Local fonts scan unavailable; continuing with Google fonts only.', error)
-    return []
-  }
-}
-
-export async function loadFontFile(file: File): Promise<FontDef> {
-  const formData = new FormData()
-  formData.append('file', file)
-
-  const res = await fetch('/upload-font', { method: 'POST', body: formData })
-  if (!res.ok) {
-    const { error } = await res.json().catch(() => ({ error: res.statusText }))
-    throw new Error(error ?? 'Upload failed')
-  }
-
-  const { family, url } = (await res.json()) as { filename: string; family: string; url: string }
-
-  const fontFace = new FontFace(family, `url(${url})`)
-  await fontFace.load()
-  document.fonts.add(fontFace)
-
-  return {
-    id: `upload-${Date.now()}`,
-    name: family,
-    family,
-    weight: 400,
-    source: 'upload',
-    uploadUrl: url,
-    isActive: true,
   }
 }

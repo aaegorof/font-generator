@@ -5,6 +5,7 @@ import { FontSyncService } from '../../../services/fontSync'
 import { getCurrentUserId } from '../../../utils/auth'
 import type { FontDef } from '../../../types'
 import { ConfirmDialog } from '../../ConfirmDialog'
+import { FontLibraryModal } from '../../FontLibraryModal'
 
 function useFontLoadStatus(fonts: FontDef[]): Set<string> {
   const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set())
@@ -62,8 +63,13 @@ function useFontLoadStatus(fonts: FontDef[]): Set<string> {
   return loadedIds
 }
 
+function fontSourceLabel(source: FontDef['source']): string {
+  if (source === 'google') return 'Google'
+  return source
+}
+
 export function FontsPage() {
-  const { fonts, toggleFontActive, removeFont, textInputs, layerFontPins, setLayerFontPin } =
+  const { fonts, toggleFontActive, removeFont, textInputs, layerFontPins, setLayerFontPin, addFont } =
     useStore()
   const loadedFontIds = useFontLoadStatus(fonts)
   const activeFonts = useMemo(() => fonts.filter((f) => f.isActive !== false), [fonts])
@@ -82,6 +88,11 @@ export function FontsPage() {
   const fontUploadRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [libraryModalOpen, setLibraryModalOpen] = useState(false)
+  const [addingLibraryFonts, setAddingLibraryFonts] = useState(false)
+  const [libraryMessage, setLibraryMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(
+    null,
+  )
   const [deleting, setDeleting] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
@@ -177,6 +188,48 @@ export function FontsPage() {
     }
   }, [])
 
+  const handleLibraryConfirm = useCallback(
+    async (selectedFonts: FontDef[]) => {
+      const existingIds = new Set(useStore.getState().fonts.map((f) => f.id))
+      const toAdd = selectedFonts.filter((f) => !existingIds.has(f.id))
+      const skipped = selectedFonts.length - toAdd.length
+
+      if (toAdd.length === 0) {
+        setLibraryMessage({
+          kind: 'success',
+          text:
+            skipped > 0
+              ? 'Those fonts are already in your library.'
+              : 'No new fonts to add.',
+        })
+        return
+      }
+
+      setAddingLibraryFonts(true)
+      setLibraryMessage(null)
+      try {
+        for (const font of toAdd) {
+          await addFont(font)
+        }
+        const parts = [`Added ${toAdd.length} font${toAdd.length !== 1 ? 's' : ''}`]
+        if (skipped > 0) {
+          parts.push(`${skipped} already in library`)
+        }
+        setLibraryMessage({ kind: 'success', text: `${parts.join('. ')}.` })
+      } catch (err) {
+        console.error('Library font save error:', err)
+        setLibraryMessage({
+          kind: 'error',
+          text:
+            err instanceof Error ? err.message : 'Could not save fonts. Please try again.',
+        })
+      } finally {
+        setAddingLibraryFonts(false)
+      }
+    },
+    [addFont],
+  )
+
   return (
     <div className="toolbar__panel pb-0">
       <div className="toolbar__font-search">
@@ -249,7 +302,7 @@ export function FontsPage() {
               >
                 {font.name}
               </span>
-              <span className="toolbar__font-source">{font.source}</span>
+              <span className="toolbar__font-source">{fontSourceLabel(font.source)}</span>
               {!loadedFontIds.has(font.id) && (
                 <span className="toolbar__font-not-loaded" title="Font is not loaded by browser" />
               )}
@@ -281,19 +334,47 @@ export function FontsPage() {
           style={{ display: 'none' }}
           onChange={handleFontUpload}
         />
-        <button
-          className="toolbar__upload-btn"
-          onClick={() => fontUploadRef.current?.click()}
-          disabled={uploading}
-        >
-          {uploading ? 'Loading…' : '+ Upload Font File'}
-        </button>
+        <div className="toolbar__transfer-row">
+          <button
+            type="button"
+            className="toolbar__upload-btn flex-1"
+            onClick={() => {
+              setLibraryMessage(null)
+              setLibraryModalOpen(true)
+            }}
+            disabled={uploading || addingLibraryFonts}
+          >
+            {addingLibraryFonts ? 'Adding…' : 'Browse Google Fonts'}
+          </button>
+          <button
+            type="button"
+            className="toolbar__upload-btn flex-1"
+            onClick={() => fontUploadRef.current?.click()}
+            disabled={uploading || addingLibraryFonts}
+          >
+            {uploading ? 'Loading…' : '+ Upload Font File'}
+          </button>
+        </div>
+        {libraryMessage && (
+          <p
+            className={libraryMessage.kind === 'error' ? 'toolbar__upload-error' : 'toolbar__hint'}
+            role={libraryMessage.kind === 'error' ? 'alert' : 'status'}
+          >
+            {libraryMessage.text}
+          </p>
+        )}
         {uploadError && (
           <p className="toolbar__upload-error" role="alert">
             {uploadError}
           </p>
         )}
       </div>
+
+      <FontLibraryModal
+        open={libraryModalOpen}
+        onClose={() => setLibraryModalOpen(false)}
+        onConfirm={handleLibraryConfirm}
+      />
 
       <ConfirmDialog
         open={confirmDelete !== null}

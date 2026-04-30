@@ -26,3 +26,25 @@
 3. Document which migrations are safe to modify in place
 
 **Priority:** Low - Current change uses `ON CONFLICT DO UPDATE` which is idempotent, but should establish pattern for future.
+
+---
+
+## UX Improvements - Font Naming Convention
+**Context:** Task 10.2 - Font Library Data Model implementation.
+
+**Issue:** Generated font names include both the weight name AND numeric weight (e.g., "Roboto Bold 700"), which may be visually redundant.
+
+**Recommendation:** Consider user testing to determine if showing both is helpful or if just the weight name (e.g., "Roboto Bold") or just the number (e.g., "Roboto 700") would be clearer.
+
+**Priority:** Low - Functional but could be more polished after real-world usage feedback.
+
+---
+
+## Future Feature - Variable Font Support
+**Context:** Task 10.2 - Font Library Data Model implementation.
+
+**Issue:** Current weight-name mapping only recognizes standard CSS weights (100-900 by 100s). Variable fonts with intermediate weights like 450 or 550 will be misrepresented.
+
+**Recommendation:** Add support for variable fonts and intermediate weights when Epic 10 scope expands beyond static fonts.
+
+**Priority:** Low - Variable fonts are explicitly out of scope for current epic.

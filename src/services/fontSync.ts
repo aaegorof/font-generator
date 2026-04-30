@@ -27,9 +27,16 @@ export class FontSyncService {
 
       return data.map((row) => {
         const fontDef = row.font_def as unknown as FontDef
+        const hasStorage = row.storage_path != null && row.storage_path !== ''
+        const uploadUrl = hasStorage ? this.getStorageUrl(row.storage_path!) : fontDef.uploadUrl
+        const source: FontDef['source'] =
+          fontDef.source ??
+          (hasStorage ? 'upload' : fontDef.localFile ? 'local' : 'google')
+
         return {
           ...fontDef,
-          uploadUrl: row.storage_path ? this.getStorageUrl(row.storage_path) : fontDef.uploadUrl,
+          source,
+          uploadUrl,
         }
       })
     } catch (err) {
@@ -43,7 +50,8 @@ export class FontSyncService {
    */
   static async saveFont(userId: string, font: FontDef): Promise<void> {
     try {
-      // Don't save default fonts
+      // Don't persist built-in presets (short ids). Google Fonts from the library use
+      // ids like google-{family}-{weight}-{style} and are not in DEFAULT_FONTS.
       if (this.isDefaultFont(font)) {
         return
       }
@@ -61,10 +69,17 @@ export class FontSyncService {
         return
       }
 
+      const storagePath =
+        font.source === 'google' || font.source === 'local'
+          ? null
+          : font.source === 'upload'
+            ? font.uploadUrl ?? null
+            : null
+
       const { error } = await supabase.from('user_fonts').insert({
         user_id: userId,
         font_def: font as unknown as Json,
-        storage_path: font.source === 'upload' ? font.uploadUrl : null,
+        storage_path: storagePath,
       })
 
       if (error) throw error
