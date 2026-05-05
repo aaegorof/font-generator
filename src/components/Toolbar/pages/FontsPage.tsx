@@ -6,6 +6,7 @@ import { getCurrentUserId } from '../../../utils/auth'
 import type { FontDef } from '../../../types'
 import { ConfirmDialog } from '../../ConfirmDialog'
 import { FontLibraryModal } from '../../FontLibraryModal'
+import { Pin } from 'lucide-react'
 
 function useFontLoadStatus(fonts: FontDef[]): Set<string> {
   const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set())
@@ -69,21 +70,53 @@ function fontSourceLabel(source: FontDef['source']): string {
 }
 
 export function FontsPage() {
-  const { fonts, toggleFontActive, removeFont, textInputs, layerFontPins, setLayerFontPin, addFont } =
+  const { fonts, toggleFontActive, removeFont, textInputs, layerFontPins, replaceLayerFontPins, addFont } =
     useStore()
   const loadedFontIds = useFontLoadStatus(fonts)
-  const activeFonts = useMemo(() => fonts.filter((f) => f.isActive !== false), [fonts])
 
   const [query, setQuery] = useState('')
 
+  const pinnedIds = useMemo(() => new Set(Object.values(layerFontPins)), [layerFontPins])
+
   const filteredFonts = useMemo(() => {
-    const active = fonts.filter((f) => f.isActive !== false)
-    const inactive = fonts.filter((f) => f.isActive === false)
-    const sorted = [...active, ...inactive]
+    const rank = (f: FontDef) => {
+      const pinned = pinnedIds.has(f.id) ? 0 : 1
+      const active = f.isActive !== false ? 0 : 1
+      return pinned * 2 + active
+    }
+    const sorted = [...fonts].sort((a, b) => {
+      const dr = rank(a) - rank(b)
+      if (dr !== 0) return dr
+      return a.name.localeCompare(b.name)
+    })
     if (!query.trim()) return sorted
     const q = query.toLowerCase()
     return sorted.filter((f) => f.name.toLowerCase().includes(q))
-  }, [fonts, query])
+  }, [fonts, query, pinnedIds])
+
+  const toggleFontListPin = useCallback(
+    (fontId: string) => {
+      const { textInputs: inputs, layerFontPins: pins } = useStore.getState()
+      if (Object.values(pins).includes(fontId)) {
+        const next = Object.fromEntries(
+          Object.entries(pins).filter(([, id]) => id !== fontId),
+        ) as Record<number, string>
+        replaceLayerFontPins(next)
+        return
+      }
+      const n = inputs.length
+      if (n <= 0) return
+      let targetLayer = 0
+      for (let i = 0; i < n; i++) {
+        if (pins[i] == null) {
+          targetLayer = i
+          break
+        }
+      }
+      replaceLayerFontPins({ ...pins, [targetLayer]: fontId })
+    },
+    [replaceLayerFontPins],
+  )
 
   const fontUploadRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
@@ -247,38 +280,15 @@ export function FontsPage() {
         )}
       </div>
 
-      {textInputs.length > 1 && (
-        <div className="toolbar__layer-pins">
-          <span className="toolbar__label">Layer Pins</span>
-          {textInputs.map((_, i) => {
-            const pinnedId = layerFontPins[i] ?? null
-            return (
-              <div key={i} className="toolbar__layer-pin-row">
-                <span className="toolbar__layer-pin-label">Layer {i + 1}</span>
-                <select
-                  className="toolbar__layer-pin-select"
-                  value={pinnedId ?? ''}
-                  onChange={(e) => setLayerFontPin(i, e.target.value || null)}
-                >
-                  <option value="">All active</option>
-                  {activeFonts.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
       <div className="toolbar__font-list">
-        {filteredFonts.map((font) => (
-          <div
-            key={font.id}
-            className={`toolbar__font-item ${font.isActive !== false ? 'toolbar__font-item--active' : ''}`}
-          >
+        {filteredFonts.map((font) => {
+          const isPinned = Object.values(layerFontPins).includes(font.id)
+          const canPin = font.isActive !== false
+          return (
+            <div
+              key={font.id}
+              className={`toolbar__font-item ${font.isActive !== false ? 'toolbar__font-item--active' : ''}`}
+            >
             <button
               className="toolbar__font-toggle"
               onClick={() => toggleFontActive(font.id)}
@@ -308,6 +318,28 @@ export function FontsPage() {
               )}
             </button>
             <button
+              type="button"
+              className={`toolbar__font-pin ${isPinned ? 'toolbar__font-pin--on' : ''}`}
+              disabled={!canPin}
+              title={
+                !canPin
+                  ? 'Enable font to pin'
+                  : isPinned
+                    ? 'Unpin from layers'
+                    : textInputs.length > 1
+                      ? 'Pin first free layer (or use tile labels for a specific layer)'
+                      : 'Pin this layer’s font'
+              }
+              aria-label={isPinned ? 'Unpin font' : 'Pin font'}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (!canPin) return
+                toggleFontListPin(font.id)
+              }}
+            >
+              <Pin className="size-3.5" strokeWidth={2.25} />
+            </button>
+            <button
               className="toolbar__font-remove"
               onClick={() => setConfirmDelete(font.id)}
               disabled={deleting === font.id}
@@ -316,7 +348,8 @@ export function FontsPage() {
               {deleting === font.id ? '...' : '×'}
             </button>
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {deleteError && (
@@ -344,7 +377,7 @@ export function FontsPage() {
             }}
             disabled={uploading || addingLibraryFonts}
           >
-            {addingLibraryFonts ? 'Adding…' : 'Browse Google Fonts'}
+            {addingLibraryFonts ? 'Adding…' : '+ Google Fonts'}
           </button>
           <button
             type="button"

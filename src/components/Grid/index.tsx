@@ -1,12 +1,9 @@
-import { useEffect, memo } from 'react'
+import { useEffect, memo, useMemo } from 'react'
 import { useStore } from '../../store/useStore'
-import { useFontFilter } from '../../hooks/useFontFilter'
 import { Tile } from '../Tile'
-import './Grid.css'
 
 export const Grid = memo(function Grid() {
-  const { tiles, settings, generateTiles, fonts, images } = useStore()
-  const { filter } = useFontFilter()
+  const { tiles, settings, generateTiles, fonts, images, layerFontPins } = useStore()
 
   useEffect(() => {
     if (tiles.length === 0) {
@@ -21,13 +18,17 @@ export const Grid = memo(function Grid() {
     }
   }, [fonts, images])
 
-  const visibleTiles = filter
-    ? tiles.filter((t) => t.fontIds[filter.layerIndex] === filter.fontId)
-    : tiles
+  const visibleTiles = useMemo(() => {
+    const pinEntries = Object.entries(layerFontPins).filter(([, id]) => id)
+    if (pinEntries.length === 0) return tiles
+    return tiles.filter((t) =>
+      pinEntries.every(([layerKey, fontId]) => t.fontIds[Number(layerKey)] === fontId),
+    )
+  }, [tiles, layerFontPins])
 
   if (tiles.length === 0) {
     return (
-      <div className="grid-empty">
+      <div className="flex min-h-[60vh] items-center justify-center text-sm tracking-wide text-text-dim">
         <p>No tiles yet. Add some fonts and images to get started.</p>
       </div>
     )
@@ -35,7 +36,7 @@ export const Grid = memo(function Grid() {
 
   if (visibleTiles.length === 0) {
     return (
-      <div className="grid-empty">
+      <div className="flex min-h-[60vh] items-center justify-center text-sm tracking-wide text-text-dim">
         <p>No tiles match this filter.</p>
       </div>
     )
@@ -43,7 +44,7 @@ export const Grid = memo(function Grid() {
 
   return (
     <div
-      className="grid"
+      className="grid w-full gap-0"
       style={{
         gridTemplateColumns: `repeat(${settings.columns}, 1fr)`,
       }}

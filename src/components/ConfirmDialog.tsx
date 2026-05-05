@@ -1,3 +1,5 @@
+import { Button } from './ui/button'
+
 interface ConfirmDialogProps {
   open: boolean
   title: string
@@ -20,23 +22,17 @@ export function ConfirmDialog({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-        <h2 className="text-xl font-bold mb-2 text-gray-900">{title}</h2>
-        <p className="text-gray-600 mb-4">{message}</p>
-        <div className="flex gap-2 justify-end">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
-          >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="mx-4 w-full max-w-md rounded-lg bg-card p-6 text-card-foreground shadow-xl ring-1 ring-border">
+        <h2 className="mb-2 text-xl font-bold">{title}</h2>
+        <p className="text-muted-foreground mb-4">{message}</p>
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
             {cancelLabel}
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-          >
+          </Button>
+          <Button type="button" variant="destructive" onClick={onConfirm}>
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

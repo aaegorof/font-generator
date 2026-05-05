@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useStore } from '../../store/useStore'
 import { useFontFilter } from '../../hooks/useFontFilter'
 import { exportTileAsPng } from '../../utils/exportTile'
-import './FavoritesViewer.css'
+import { cn } from '@/lib/utils'
+import { Button } from '../ui/button'
 
 export function FavoritesViewer() {
   const {
@@ -76,24 +77,37 @@ export function FavoritesViewer() {
   }
 
   return (
-    <div className="fav-viewer" onClick={closeFavoritesView}>
-      <div className="fav-viewer__content" onClick={(e) => e.stopPropagation()}>
-        {/* Close */}
-        <button className="fav-viewer__close" onClick={closeFavoritesView}>
+    <div
+      className="animate-in fade-in-0 fixed inset-0 z-1000 flex items-center justify-center bg-black/92 backdrop-blur-[8px] duration-200"
+      onClick={closeFavoritesView}
+    >
+      <div
+        className="relative flex max-h-[90vh] w-full max-w-[min(1200px,92vw)] flex-col gap-4 px-[60px] box-border"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="absolute -top-10 right-[60px] rounded-full text-text-secondary hover:bg-transparent hover:text-white"
+          onClick={closeFavoritesView}
+        >
           <CloseIcon />
-        </button>
+        </Button>
 
-        {/* Slide */}
-        <div className="fav-viewer__slide" ref={slideRef}>
+        <div
+          className="relative aspect-4/3 shrink-0 overflow-hidden rounded-lg bg-bg-subtle"
+          ref={slideRef}
+        >
           <img
-            className="fav-viewer__image"
+            className="absolute inset-0 block h-full w-full object-cover"
             src={tile.imageUrl}
             alt=""
             crossOrigin="anonymous"
             style={settings.grayscale ? { filter: 'grayscale(1)' } : undefined}
           />
           <div
-            className="fav-viewer__overlay"
+            className="absolute inset-0"
             style={{ backgroundColor: `rgba(0,0,0,${settings.overlayOpacity})` }}
           />
 
@@ -110,10 +124,17 @@ export function FavoritesViewer() {
                   ? 'flex-end'
                   : 'center'
 
+            const vAlign =
+              input.verticalAlignment === 'top'
+                ? 'justify-start'
+                : input.verticalAlignment === 'bottom'
+                  ? 'justify-end'
+                  : 'justify-center'
+
             return (
               <div
                 key={input.id}
-                className={`fav-viewer__text fav-viewer__text--v-${input.verticalAlignment}`}
+                className={cn('pointer-events-none absolute inset-0 flex flex-col', vAlign)}
                 style={{
                   padding: Math.max(settings.padding * 1.5, 40),
                   alignItems,
@@ -142,21 +163,21 @@ export function FavoritesViewer() {
           })}
         </div>
 
-        {/* Meta */}
-        <div className="fav-viewer__meta">
-          <div className="fav-viewer__fonts">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2">
             {tile.fontIds.slice(0, textInputs.length).map((fId, i) => (
               <button
                 key={i}
-                className="fav-viewer__font-tag"
+                type="button"
+                className="flex cursor-pointer items-center gap-1.5 rounded-[20px] border border-white/10 bg-white/[0.07] px-2.5 py-1 font-inherit text-[11px] tracking-[0.04em] text-text-soft hover:bg-white/12 hover:text-white"
                 onClick={() => {
                   setFilter(i, fId)
                   closeFavoritesView()
                 }}
-                title={`Filter by ${getFontName(fId)} (layer ${i + 1})`}
+                title={`Pin layer ${i + 1} to ${getFontName(fId)}`}
               >
                 <span
-                  className="fav-viewer__font-preview"
+                  className="text-base leading-none text-white"
                   style={{ fontFamily: getFontFamily(fId), fontWeight: getFontWeight(fId) }}
                 >
                   Aa
@@ -166,45 +187,68 @@ export function FavoritesViewer() {
             ))}
           </div>
 
-          <div className="fav-viewer__controls">
-            <button
-              className="fav-viewer__btn fav-viewer__btn--danger"
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              className="border-white/10 bg-white/[0.07] px-2 tracking-[0.06em] text-text-soft uppercase hover:border-red-500/40 hover:bg-red-500/20 hover:text-[#ff6b6b]"
               onClick={handleDelete}
               title="Remove from favorites"
             >
               <TrashIcon />
-            </button>
-            <button className="fav-viewer__btn" onClick={handleExport} title="Export as PNG">
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              className="gap-1.5 border-white/10 bg-white/[0.07] tracking-[0.06em] text-text-soft uppercase hover:bg-white/12 hover:text-white"
+              onClick={handleExport}
+              title="Export as PNG"
+            >
               <DownloadIcon />
               <span>Export PNG</span>
-            </button>
+            </Button>
           </div>
         </div>
 
-        {/* Navigation */}
         {total > 1 && (
           <>
-            <button className="fav-viewer__nav fav-viewer__nav--prev" onClick={goPrev}>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-lg"
+              className="absolute top-1/2 left-2 mt-[-30px] size-11 -translate-y-1/2 rounded-full border-white/10 bg-black/50 text-white backdrop-blur-sm hover:border-white/30 hover:bg-black/80"
+              onClick={goPrev}
+            >
               <ChevronLeftIcon />
-            </button>
-            <button className="fav-viewer__nav fav-viewer__nav--next" onClick={goNext}>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-lg"
+              className="absolute top-1/2 right-2 mt-[-30px] size-11 -translate-y-1/2 rounded-full border-white/10 bg-black/50 text-white backdrop-blur-sm hover:border-white/30 hover:bg-black/80"
+              onClick={goNext}
+            >
               <ChevronRightIcon />
-            </button>
+            </Button>
           </>
         )}
 
-        {/* Counter */}
-        <div className="fav-viewer__counter">
+        <div className="absolute -top-10 left-[60px] text-[11px] font-medium tracking-[0.06em] text-text-muted tabular-nums">
           {favoritesViewIndex + 1} / {total}
         </div>
 
-        {/* Dots */}
         {total <= 20 && (
-          <div className="fav-viewer__dots">
+          <div className="flex justify-center gap-1.5 pb-2">
             {favorites.map((_, i) => (
               <button
                 key={i}
-                className={`fav-viewer__dot ${i === favoritesViewIndex ? 'fav-viewer__dot--active' : ''}`}
+                type="button"
+                className={cn(
+                  'h-1.5 w-1.5 cursor-pointer rounded-full border-none bg-border-muted p-0 transition-all hover:bg-white/40',
+                  i === favoritesViewIndex && 'scale-[1.3] bg-white',
+                )}
                 onClick={() => setFavoritesViewIndex(i)}
               />
             ))}

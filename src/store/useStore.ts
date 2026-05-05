@@ -1,8 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { FontDef, TileData, Settings, FavoriteItem, TextInput } from '../types'
-import type { SettingsExport } from '../utils/exportSettings'
-import { DEFAULT_FONTS, injectUploadedFont } from '../utils/fonts'
+import { DEFAULT_FONTS } from '../utils/fonts'
 import { DEFAULT_IMAGES } from '../utils/images'
 import { generateAllTiles, randomizeTiles } from '../utils/tileGenerator'
 import { FontSyncService } from '../services/fontSync'
@@ -62,6 +61,7 @@ interface AppActions {
   removeFont: (id: string) => void
   toggleFontActive: (id: string) => void
   setLayerFontPin: (layerIndex: number, fontId: string | null) => void
+  replaceLayerFontPins: (pins: Record<number, string>) => void
 
   addImage: (url: string) => void
   setUserImages: (images: string[]) => void
@@ -81,7 +81,6 @@ interface AppActions {
   closeFavoritesView: () => void
   setFavoritesViewIndex: (idx: number) => void
   setFontManagerOpen: (open: boolean) => void
-  importAllSettings: (data: SettingsExport) => void
 }
 
 type AppStore = AppState & AppActions
@@ -134,7 +133,7 @@ export const useStore = create<AppStore>()(
         },
 
         // Fonts
-        addFont: (font) => {
+        addFont: async (font) => {
           // Check if font already exists to avoid duplicates
           const currentFonts = get().fonts
           if (currentFonts.find((f) => f.id === font.id)) {
@@ -244,6 +243,17 @@ export const useStore = create<AppStore>()(
               pins[layerIndex] = fontId
             }
             return { layerFontPins: pins }
+          })
+          const { fonts, textInputs, layerFontPins } = get()
+          set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
+        },
+        replaceLayerFontPins: (pins) => {
+          set((state) => {
+            const validFontIds = new Set(state.fonts.map((f) => f.id))
+            const layerFontPins = Object.fromEntries(
+              Object.entries(pins).filter(([, id]) => validFontIds.has(id)),
+            ) as Record<number, string>
+            return { layerFontPins }
           })
           const { fonts, textInputs, layerFontPins } = get()
           set({ tiles: generateAllTiles(fonts, activeImages(), textInputs.length, layerFontPins) })
@@ -397,32 +407,6 @@ export const useStore = create<AppStore>()(
         setFavoritesViewIndex: (idx) => set({ favoritesViewIndex: idx }),
         setFontManagerOpen: (open) => set({ fontManagerOpen: open }),
 
-        // Import / Export
-        importAllSettings: (data) => {
-          const mergedSettings: Settings = { ...DEFAULT_SETTINGS, ...data.settings }
-          const textInputs = data.textInputs ?? DEFAULT_TEXT_INPUTS
-          set({
-            settings: mergedSettings,
-            textInputs,
-            fonts: data.fonts ?? get().fonts,
-            images: data.images ?? get().images,
-            favorites: data.favorites ?? get().favorites,
-            toolbarOpen: data.toolbarOpen ?? get().toolbarOpen,
-          })
-          const fonts = data.fonts ?? []
-          fonts
-            .filter((f) => f.source === 'upload' && f.uploadUrl)
-            .forEach((f) => injectUploadedFont(f))
-          const { textInputs: updatedInputs, layerFontPins } = get()
-          set({
-            tiles: generateAllTiles(
-              fonts.length ? fonts : get().fonts,
-              activeImages(),
-              updatedInputs.length,
-              layerFontPins,
-            ),
-          })
-        },
       }
     },
     {

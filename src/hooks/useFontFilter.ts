@@ -1,38 +1,21 @@
 import { useCallback } from 'react'
-import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
-
-export interface FontFilter {
-  layerIndex: number
-  fontId: string
-}
+import { useStore } from '../store/useStore'
 
 export function useFontFilter() {
-  const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-  const location = useLocation()
-
-  const raw = searchParams.get('fontFilter')
-  const filter: FontFilter | null = raw
-    ? (() => {
-        const [layer, ...rest] = raw.split(':')
-        return { layerIndex: Number(layer), fontId: rest.join(':') }
-      })()
-    : null
+  const layerFontPins = useStore((s) => s.layerFontPins)
+  const setLayerFontPin = useStore((s) => s.setLayerFontPin)
+  const replaceLayerFontPins = useStore((s) => s.replaceLayerFontPins)
 
   const setFilter = useCallback(
     (layerIndex: number, fontId: string) => {
-      const params = new URLSearchParams(searchParams)
-      params.set('fontFilter', `${layerIndex}:${fontId}`)
-      navigate(`?${params.toString()}`)
+      setLayerFontPin(layerIndex, fontId)
     },
-    [searchParams, navigate],
+    [setLayerFontPin],
   )
 
   const clearFilter = useCallback(() => {
-    const params = new URLSearchParams(searchParams)
-    params.delete('fontFilter')
-    navigate({ pathname: location.pathname, search: params.toString() }, { replace: true })
-  }, [searchParams, navigate, location.pathname])
+    replaceLayerFontPins({})
+  }, [replaceLayerFontPins])
 
-  return { filter, setFilter, clearFilter }
+  return { setFilter, clearFilter, layerFontPins }
 }

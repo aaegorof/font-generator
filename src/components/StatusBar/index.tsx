@@ -1,9 +1,9 @@
-import { memo, useCallback, useRef, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import { useFontFilter } from '../../hooks/useFontFilter'
-import { exportAllSettings, parseSettingsFile } from '../../utils/exportSettings'
-import './StatusBar.css'
+import { exportAllSettings } from '../../utils/exportSettings'
 import { AuthButton } from '../Auth/AuthButton'
+import { Button } from '../ui/button'
 
 export const StatusBar = memo(function StatusBar() {
   const {
@@ -17,20 +17,30 @@ export const StatusBar = memo(function StatusBar() {
     textInputs,
     images,
     toolbarOpen,
-    importAllSettings,
   } = useStore()
-  const { filter, clearFilter } = useFontFilter()
-  const importRef = useRef<HTMLInputElement>(null)
+  const { clearFilter, layerFontPins } = useFontFilter()
   const [exporting, setExporting] = useState(false)
 
-  const totalTiles = tiles.length
-  const filteredTiles = filter
-    ? tiles.filter((t) => t.fontIds[filter.layerIndex] === filter.fontId).length
-    : totalTiles
+  const pinEntries = useMemo(
+    () => Object.entries(layerFontPins).filter(([, id]) => id) as [string, string][],
+    [layerFontPins],
+  )
 
-  const filterFontName = filter
-    ? (fonts.find((f) => f.id === filter.fontId)?.name ?? filter.fontId)
-    : null
+  const totalTiles = tiles.length
+  const filteredTiles = useMemo(() => {
+    if (pinEntries.length === 0) return totalTiles
+    return tiles.filter((t) =>
+      pinEntries.every(([layerKey, fontId]) => t.fontIds[Number(layerKey)] === fontId),
+    ).length
+  }, [tiles, pinEntries, totalTiles])
+
+  const pinSummary = useMemo(() => {
+    if (pinEntries.length === 0) return null
+    return pinEntries.map(([layerKey, fontId]) => ({
+      layer: Number(layerKey),
+      label: fonts.find((f) => f.id === fontId)?.name ?? fontId,
+    }))
+  }, [pinEntries, fonts])
 
   const handleReset = useCallback(() => {
     clearFilter()
@@ -48,87 +58,74 @@ export const StatusBar = memo(function StatusBar() {
     }
   }, [settings, textInputs, fonts, images, favorites, toolbarOpen])
 
-  const handleImport = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (!file) return
-      try {
-        const data = await parseSettingsFile(file)
-        importAllSettings(data)
-      } catch (err) {
-        console.error('Import error:', err)
-        alert('Failed to import settings. Make sure the file is a valid export.')
-      } finally {
-        if (importRef.current) importRef.current.value = ''
-      }
-    },
-    [importAllSettings],
-  )
 
   return (
-    <div className="status-bar">
-      <div className="status-bar__left">
+    <div className="bg-background sticky top-0 z-10 flex shrink-0 items-center justify-between px-4 py-1 text-xs text-muted-foreground">
+      <div className="flex items-center gap-3">
         {favorites.length > 0 && (
-          <button className="status-bar__favorites" onClick={() => openFavoritesView(0)}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            className="gap-1 px-0 text-[11px] text-[#e05] hover:bg-transparent hover:text-[#ff2266]"
+            onClick={() => openFavoritesView(0)}
+          >
             <HeartIcon />
             <span>{favorites.length}</span>
-          </button>
+          </Button>
         )}
 
-        <span className="status-bar__count">
-          {filter && filteredTiles !== totalTiles
+        <span className="text-white/50">
+          {pinSummary && filteredTiles !== totalTiles
             ? `${filteredTiles} / ${totalTiles}`
             : `${totalTiles}`}
           {' variations'}
         </span>
 
-        {filter && filterFontName && (
-          <span className="status-bar__filter">
-            Layer {filter.layerIndex + 1}: <strong>{filterFontName}</strong>
-            <button className="status-bar__filter-clear" onClick={clearFilter} title="Clear filter">
+        {pinSummary && pinSummary.length > 0 && (
+          <span className="flex max-w-[min(420px,55vw)] flex-wrap items-center gap-x-1.5 gap-y-0.5 rounded-[10px] bg-white/8 px-2 py-0.5 text-[11px] text-white/80">
+            <span className="shrink-0 text-white/50">Pinned:</span>
+            {pinSummary.map(({ layer, label }, idx) => (
+              <span key={layer} className="flex items-center gap-1.5 whitespace-nowrap">
+                {idx > 0 && <span className="text-white/35">·</span>}
+                <span>
+                  L{layer + 1} <strong className="text-white">{label}</strong>
+                </span>
+              </span>
+            ))}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              className="text-white/40 hover:text-white ml-0.5 h-5 min-w-5 shrink-0 text-sm leading-none hover:bg-transparent"
+              onClick={clearFilter}
+              title="Clear layer pins"
+            >
               ×
-            </button>
+            </Button>
           </span>
         )}
       </div>
 
-      <div className="status-bar__right">
-        <button
-          className="status-bar__action-btn status-bar__action-btn--outline"
-          onClick={randomize}
-        >
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="xs" onClick={randomize}>
           <ShuffleIcon />
           <span>Randomize</span>
-        </button>
-        <button
-          className="status-bar__action-btn status-bar__action-btn--outline"
-          onClick={handleReset}
-        >
+        </Button>
+        <Button variant="ghost" size="xs" onClick={handleReset}>
           <RefreshIcon />
           <span>Reset</span>
-        </button>
-        <button
-          className="status-bar__action-btn status-bar__action-btn--outline"
+        </Button>
+        <Button
+          variant="ghost"
+          size="xs"
           onClick={handleExport}
           disabled={exporting}
           title="Export settings"
         >
-          <ExportIcon /> Export
-        </button>
-        <input
-          ref={importRef}
-          type="file"
-          accept=".json"
-          style={{ display: 'none' }}
-          onChange={handleImport}
-        />
-        <button
-          className="status-bar__action-btn status-bar__action-btn--outline"
-          onClick={() => importRef.current?.click()}
-          title="Import settings"
-        >
-          <ImportIcon /> Import
-        </button>
+          <ExportIcon />
+          <span>Export</span>
+        </Button>
         <AuthButton />
       </div>
     </div>
@@ -207,21 +204,3 @@ function ExportIcon() {
   )
 }
 
-function ImportIcon() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  )
-}

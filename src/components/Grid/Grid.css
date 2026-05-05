@@ -1,9 +1,0 @@
-@reference '../../index.css';
-
-.grid {
-  @apply grid w-full gap-0;
-}
-
-.grid-empty {
-  @apply text-text-dim flex min-h-[60vh] items-center justify-center text-[14px] tracking-[0.04em];
-}

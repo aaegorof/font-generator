@@ -1,4 +1,5 @@
 import { useAuth } from '../../hooks/useAuth'
+import { Button } from '../ui/button'
 
 export const AuthButton = () => {
   const { user, loading, signInWithGoogle, signOut, error } = useAuth()
@@ -9,17 +10,21 @@ export const AuthButton = () => {
 
   if (user) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className="flex items-center gap-2">
         <span>{user.email}</span>
-        <button className="status-bar__action-btn status-bar__action-btn--outline" onClick={signOut}>Sign out</button>
+        <Button size="sm" onClick={signOut}>
+          Sign out
+        </Button>
       </div>
     )
   }
 
   return (
-    <div className="status-bar__action-btn status-bar__action-btn--outline">
-      <button onClick={signInWithGoogle}>Sign in with Google</button>
-      {error && <div style={{ color: 'red', marginTop: '5px' }}>{error.message}</div>}
-    </div>
+    <>
+      <Button size="sm" onClick={signInWithGoogle}>
+        Sign in with Google
+      </Button>
+      {error && <div className="mt-1 text-sm text-destructive">{error.message}</div>}
+    </>
   )
 }

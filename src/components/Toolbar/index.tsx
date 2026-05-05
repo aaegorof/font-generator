@@ -3,6 +3,7 @@ import { useStore } from '../../store/useStore'
 import { SettingsPage } from './pages/SettingsPage'
 import { FontsPage } from './pages/FontsPage'
 import { ImagesPage } from './pages/ImagesPage'
+import { Button } from '../ui/button'
 import './Toolbar.css'
 
 const TABS = [
@@ -18,13 +19,16 @@ export function Toolbar() {
     <div className={`toolbar ${toolbarOpen ? 'toolbar--open' : 'toolbar--closed'}`}>
       <div className="toolbar__header">
         <span className="toolbar__brand">Font Generator</span>
-        <button
-          className="toolbar__toggle"
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className="text-text-muted hover:bg-bg-subtle hover:text-text-light rounded-md border-0 bg-transparent"
           onClick={toggleToolbar}
           title={toolbarOpen ? 'Collapse' : 'Expand'}
         >
           <ChevronIcon open={toolbarOpen} />
-        </button>
+        </Button>
       </div>
 
       <nav className="toolbar__tabs">

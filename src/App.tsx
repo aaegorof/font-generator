@@ -8,13 +8,13 @@ import { useAuth } from './hooks/useAuth'
 import { useAuthCallback } from './hooks/useAuthCallback'
 import { useUserData } from './hooks/useUserData'
 import { useSupabaseSync } from './hooks/useSupabaseSync'
+import { LayerPinsUrlSync } from './hooks/useLayerPinsUrlSync'
 import {
   setupGoogleFonts,
   collectActiveGoogleFontsUsedInTiles,
   injectLocalFontFaces,
   injectUploadedFont,
 } from './utils/fonts'
-import './App.css'
 
 export default function App() {
   const { fonts, tiles } = useStore()
@@ -59,9 +59,10 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className="flex h-screen overflow-hidden bg-bg-base">
+      <LayerPinsUrlSync />
       <Toolbar />
-      <main className="app__main">
+      <main className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
         <StatusBar />
         <Grid />
       </main>

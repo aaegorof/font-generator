@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import type { Settings, TextInput, FontDef, FavoriteItem } from '../types'
 import type { Json } from '../types/database.types'
 import { validateUserProfile } from '../utils/validation'
+import { getPinsFromSearchParams } from '../utils/layerPinsUrl'
 import { FontSyncService } from '../services/fontSync'
 import { ImageSyncService } from '../services/imageSync'
 import { FavoriteSyncService } from '../services/favoriteSync'
@@ -269,6 +270,14 @@ export function useSupabaseSync(userId: string | null): UseSupabaseSyncReturn {
       } catch (favoriteErr) {
         console.error('Error loading favorites:', favoriteErr)
         // Don't throw - continue with profile load even if favorites fail
+      }
+
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        const fromUrl = getPinsFromSearchParams(urlParams)
+        if (Object.keys(fromUrl).length > 0) {
+          store.replaceLayerFontPins(fromUrl)
+        }
       }
 
       setLastSynced(new Date(data.updated_at))

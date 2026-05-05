@@ -3,7 +3,8 @@ import { useStore } from '../../store/useStore'
 import { useFontFilter } from '../../hooks/useFontFilter'
 import { exportTileAsPng } from '../../utils/exportTile'
 import type { TileData } from '../../types'
-import './Tile.css'
+import { cn } from '@/lib/utils'
+import { Button } from '../ui/button'
 
 interface TileProps {
   tile: TileData
@@ -81,9 +82,13 @@ export const Tile = memo(function Tile({ tile, favoriteIndex }: TileProps) {
   }
 
   return (
-    <div className="tile" ref={tileRef} data-tile-id={tile.id}>
+    <div
+      className="group relative block aspect-4/3 cursor-pointer overflow-hidden bg-bg-subtle"
+      ref={tileRef}
+      data-tile-id={tile.id}
+    >
       <img
-        className="tile__image"
+        className="absolute inset-0 block h-full w-full object-cover transition-transform duration-400 ease-out group-hover:scale-[1.03]"
         src={tile.imageUrl}
         alt=""
         loading="lazy"
@@ -92,7 +97,7 @@ export const Tile = memo(function Tile({ tile, favoriteIndex }: TileProps) {
       />
 
       <div
-        className="tile__overlay"
+        className="pointer-events-none absolute inset-0"
         style={{ backgroundColor: `rgba(0,0,0,${settings.overlayOpacity})` }}
       />
 
@@ -109,10 +114,17 @@ export const Tile = memo(function Tile({ tile, favoriteIndex }: TileProps) {
               ? 'flex-end'
               : 'center'
 
+        const vAlign =
+          input.verticalAlignment === 'top'
+            ? 'justify-start'
+            : input.verticalAlignment === 'bottom'
+              ? 'justify-end'
+              : 'justify-center'
+
         return (
           <div
             key={input.id}
-            className={`tile__text tile__text--v-${input.verticalAlignment}`}
+            className={cn('absolute inset-0 flex flex-col', vAlign)}
             style={{
               padding: settings.padding,
               alignItems,
@@ -122,7 +134,7 @@ export const Tile = memo(function Tile({ tile, favoriteIndex }: TileProps) {
             {lines.map((line, lineIdx) => (
               <div
                 key={lineIdx}
-                className="tile__line"
+                className="block wrap-break-word"
                 style={{
                   fontFamily: getFontFamily(fontId),
                   fontWeight: getFontWeight(fontId),
@@ -141,47 +153,64 @@ export const Tile = memo(function Tile({ tile, favoriteIndex }: TileProps) {
         )
       })}
 
-      <div className="tile__actions">
-        <button
-          className={`tile__action tile__action--heart ${isFav ? 'tile__action--heart-active' : ''}`}
+      <div className="absolute top-2.5 right-2.5 flex -translate-y-1 flex-col gap-1.5 opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover:translate-y-0 group-hover:opacity-100">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className={cn(
+            'h-[30px] w-[30px] rounded-full border border-white/10 bg-black/65 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-black/85 hover:border-white/30 hover:text-white',
+            isFav && 'text-accent-heart [&_svg]:fill-accent-heart [&_svg]:stroke-accent-heart',
+          )}
           onClick={handleFavoriteToggle}
           title={isFav ? 'Remove from favorites' : 'Add to favorites'}
         >
           <HeartIcon filled={isFav} />
-        </button>
-        <button
-          className="tile__action tile__action--shuffle"
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className="h-[30px] w-[30px] rounded-full border border-white/10 bg-black/65 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-black/85 hover:border-white/30"
           onClick={handleShuffle}
           title="Randomize fonts"
         >
           <ShuffleMiniIcon />
-        </button>
-        <button
-          className="tile__action tile__action--export"
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className="h-[30px] w-[30px] rounded-full border border-white/10 bg-black/65 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-black/85 hover:border-white/30"
           onClick={handleExport}
           title="Export as PNG"
         >
           <DownloadIcon />
-        </button>
+        </Button>
       </div>
 
-      <div className="tile__font-labels">
+      <div className="absolute right-0 bottom-0 left-0 flex translate-y-1 flex-wrap gap-1 p-2 opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover:translate-y-0 group-hover:opacity-100">
         {tile.fontIds.slice(0, textInputs.length).map((fId, i) => (
           <button
             key={i}
-            className="tile__font-label"
+            type="button"
+            className="cursor-pointer rounded-[3px] border-none bg-black/55 px-1.5 py-0.5 font-inherit text-[9px] font-semibold tracking-[0.08em] text-white/70 uppercase backdrop-blur-sm hover:bg-black/75 hover:text-white"
             onClick={(e) => {
               e.stopPropagation()
               setFilter(i, fId)
             }}
-            title={`Filter by ${getFontName(fId)} (layer ${i + 1})`}
+            title={`Pin layer ${i + 1} to ${getFontName(fId)}`}
           >
             {getFontName(fId)}
           </button>
         ))}
       </div>
 
-      {favoriteIndex !== undefined && <div className="tile__fav-badge">{favoriteIndex + 1}</div>}
+      {favoriteIndex !== undefined && (
+        <div className="absolute top-2.5 left-2.5 flex size-[22px] items-center justify-center rounded-full bg-accent-heart/90 text-[10px] font-bold text-white">
+          {favoriteIndex + 1}
+        </div>
+      )}
     </div>
   )
 })
